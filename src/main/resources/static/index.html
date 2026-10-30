@@ -2,9 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="widt=device-width, initial-scale=1.0">
+    <title>Barnets Gaderobe Guide</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
+
+<header>
+    <h1> Barnets Gaderobe Guide</h1>
+    <p>Find det rigtige tøj til dit barn</p>
+</header>
+
+<main>
+    <section class="card weather-section">
+        <h2>Dagens vejr</h2>
+        <div id="weather">
+            <p>Henter dagens vejr...</p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Oplysninger om dit barn</h2>
+
+        <form id="outfitForm">
+            <fieldset>
+                <legend>Aktivitetsniveau</legend>
+
+                <label>
+                    <input type="radio" name="activity"
+                           value="CRAWLING">
+                    Kravlende
+                </label>
+
+                <label>
+                    <input type="radio" name="activity"
+                           value="BEGINNER" required>
+                    Begynder
+                </label>
+
+
+                <label>
+                    <input type="radio" name="activity"
+                           value="STABLE">
+                    Stabil
+                </label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Skal barnet være udenfor?</legend>
+
+                <label>
+                    <input type="radio" name="dayType"
+                           value="OUTDOOR" required>
+                    Ja, udendørs
+                </label>
+
+                <label>
+                    <input type="radio" name="dayType"
+                           value="INDOOR">
+                    Nej, indendørs
+                </label>
+            </fieldset>
+
+            <h2>Hvilket tøj har i allerede?</h2>
+            <p>Vælg det tøj, barnet har til rådighed</p>
+
+            <fieldset>
+                <legend>Tilbehør</legend>
+
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="acessories"
+                               value="NECK_WARMER">
+                        Halsedisse
+                    </label>
+                </div>
+            </fieldset>
+        </form>
+    </section>
+
+    <section class="card result-seciton" id="result" hidden>
+        <h2>Anbefalet påklædning</h2>
+    </section>
+</main>
 
 </body>
 </html>
