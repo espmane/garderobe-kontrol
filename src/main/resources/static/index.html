@@ -26,6 +26,9 @@
         <h2>Oplysninger om dit barn</h2>
 
         <form id="outfitForm">
+
+            <div class="activity-grid">
+
             <fieldset>
                 <legend>Aktivitetsniveau</legend>
 
@@ -65,15 +68,19 @@
                 </label>
             </fieldset>
 
+            </div>
+
             <h2>Hvilket tøj har i allerede?</h2>
             <p>Vælg det tøj, barnet har til rådighed</p>
+
+            <div class="clothing-grid">
 
             <fieldset>
                 <legend>Tilbehør</legend>
 
-                <div class="checkbox">
+                <div class="checkbox-grid">
                     <label>
-                        <input type="checkbox" name="acessories"
+                        <input type="checkbox" name="accessories"
                                value="NECK_WARMER">
                         Halsedisse
                     </label>
@@ -304,7 +311,6 @@
                 </div>
             </fieldset>
 
-            <!-- Extra information -->
             <fieldset>
                 <legend>Ekstra oplysninger</legend>
 
@@ -320,7 +326,7 @@
                     Barnet skal have ekstra skiftetøj
                 </label>
             </fieldset>
-
+            </div>
             <button type="submit" id="submitButton">
                 Find passende tøj
             </button>
