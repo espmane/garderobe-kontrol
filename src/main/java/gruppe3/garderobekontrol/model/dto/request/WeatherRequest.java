@@ -1,4 +1,9 @@
 package gruppe3.garderobekontrol.model.dto.request;
 
-public record WeatherRequest() {
+import java.time.LocalDate;
+
+public record WeatherRequest(
+        String city,
+        LocalDate date
+) {
 }

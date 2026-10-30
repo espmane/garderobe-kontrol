@@ -6,7 +6,8 @@ public record WeatherResponse(
         int humidity,
         double uvIndex,
         double precipitationAmount,
-        double snowFall
+        double snowFall,
+        String weatherDescription
 )
 
 {
