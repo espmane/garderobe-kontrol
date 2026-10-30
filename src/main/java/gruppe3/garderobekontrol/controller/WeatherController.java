@@ -14,6 +14,6 @@ public class WeatherController {
 
     @PostMapping("/api/weather/demo")
     public String demo() {
-        return sevice.demo();
+        return service.demo();
     }
 }
