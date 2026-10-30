@@ -1,4 +1,4 @@
 package gruppe3.garderobekontrol.model.dto.request;
 
-public record Weather() {
+public record WeatherRequest() {
 }
