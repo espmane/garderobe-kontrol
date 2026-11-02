@@ -1,5 +1,6 @@
 package gruppe3.garderobekontrol.service;
 
+import gruppe3.garderobekontrol.model.Location;
 import gruppe3.garderobekontrol.model.dto.response.WeatherResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -9,9 +10,6 @@ import java.util.List;
 @Service
 public class WeatherClient {
     private final RestClient client;
-
-    private double LONGITUDE;
-    private double LATITUDE;
     private final List<String> PARAMETERS;
 
 
@@ -30,12 +28,12 @@ public class WeatherClient {
         );
     }
 
-    public WeatherResponse fetch() {
+    public WeatherResponse fetch(Location location) {
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/forecastedr/collections/harmonie_dini_sf/position")
                         .queryParam("coords",
-                                "POINT(" + LONGITUDE + " " + LATITUDE + ")")
+                                "POINT(" + location.getLatitude() + " " + location.getLongitude() + ")")
                         .queryParam("crs", "crs84")
                         .queryParam("parameter-name",
                                 String.join(",", PARAMETERS))
