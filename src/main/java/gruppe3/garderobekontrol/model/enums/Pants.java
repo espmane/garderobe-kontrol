@@ -4,5 +4,5 @@ public enum Pants {
     SHORTS,
     REGULAR_PANTS,
     RAIN_PANTS,
-    WINTER_PANTS
+    THERMAL_PANTS
 }
