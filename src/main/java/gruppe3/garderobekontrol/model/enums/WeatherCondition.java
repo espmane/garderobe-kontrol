@@ -1,4 +1,4 @@
-package gruppe3.garderobekontrol.model;
+package gruppe3.garderobekontrol.model.enums;
 
 public enum WeatherCondition {
 
