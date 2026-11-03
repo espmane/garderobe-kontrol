@@ -1,12 +1,13 @@
 package gruppe3.garderobekontrol.service;
 
-import gruppe3.garderobekontrol.model.Weather;
-import gruppe3.garderobekontrol.model.dto.response.DmiResponse;
+import gruppe3.garderobekontrol.model.Location;
+import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
 import gruppe3.garderobekontrol.model.dto.response.WeatherResponse;
 import gruppe3.garderobekontrol.model.enums.City;
-import gruppe3.garderobekontrol.model.Location;
-
 import org.springframework.stereotype.Service;
+
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 @Service
 public class WeatherService {
@@ -16,19 +17,32 @@ public class WeatherService {
         this.client = client;
     }
 
+    // Skal ændres så lokation ikke er en hardkodet værdi
     public WeatherResponse getWeather() {
-        DmiResponse.Properties p = client.fetch(new Location(City.COPENHAGEN))
-                .features().get(0).properties();   // første tidspunkt = nu
+        OpenMeteoResponse r = client.fetch(new Location(City.COPENHAGEN));
+        
+        int hour = LocalTime.now(ZoneId.of("Europe/Copenhagen")).getHour();
 
-        return new Weather(
-                p.temperature() - 273.15,      // °C
-                null,                          // vejrtype: tilføjes senere
-                p.rainRate() * 3600,
-                p.snowRate() * 3600,
-                p.windSpeed(),
-                p.windGust(),
-                null,                          // skydække: tilføjes senere
-                null);                         // sol: tilføjes senere
+        return new WeatherResponse(
+                r.hourly().temperature().get(hour),
+                r.hourly().windSpeed().get(hour),
+                r.hourly().humidity().get(hour),
+                r.daily().uvIndex().get(0),            // daily har kun én dag
+                r.daily().precipitation().get(0),
+                r.daily().snowfall().get(0),
+                describe(r.daily().weatherCode().get(0)));
+    }
+
+    private String describe(int code) {
+        return switch (code) {
+            case 0 -> "Klart";
+            case 1, 2, 3 -> "Let skyet til overskyet";
+            case 45, 48 -> "Tåge";
+            case 51, 53, 55, 56, 57 -> "Støvregn";
+            case 61, 63, 65, 66, 67, 80, 81, 82 -> "Regn";
+            case 71, 73, 75, 77, 85, 86 -> "Sne";
+            case 95, 96, 99 -> "Tordenvejr";
+            default -> "Ukendt";
+        };
     }
 }
-
