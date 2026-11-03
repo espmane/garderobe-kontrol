@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 public class WeatherService {
@@ -20,20 +21,29 @@ public class WeatherService {
     // Skal ændres så lokation ikke er en hardkodet værdi
     public WeatherResponse getWeather() {
         OpenMeteoResponse r = client.fetch(new Location(City.COPENHAGEN));
-        
+
         int hour = LocalTime.now(ZoneId.of("Europe/Copenhagen")).getHour();
 
         return new WeatherResponse(
-                r.hourly().temperature().get(hour),
-                r.hourly().windSpeed().get(hour),
-                r.hourly().humidity().get(hour),
-                r.daily().uvIndex().get(0),            // daily har kun én dag
-                r.daily().precipitation().get(0),
-                r.daily().snowfall().get(0),
+                number(r.hourly().temperature(), hour),
+                number(r.hourly().windSpeed(), hour),
+                (int) number(r.hourly().humidity(), hour),
+                number(r.daily().uvIndex(), 0),        // daily har kun én dag
+                number(r.daily().precipitation(), 0),
+                number(r.daily().snowfall(), 0),
                 describe(r.daily().weatherCode().get(0)));
     }
 
-    private String describe(int code) {
+    // Returnerer 0, hvis listen eller værdien mangler (null)
+    private double number(List<? extends Number> list, int index) {
+        if (list == null || index >= list.size() || list.get(index) == null) {
+            return 0.0;
+        }
+        return list.get(index).doubleValue();
+    }
+
+    private String describe(Integer code) {
+        if (code == null) return "Ukendt";
         return switch (code) {
             case 0 -> "Klart";
             case 1, 2, 3 -> "Let skyet til overskyet";
