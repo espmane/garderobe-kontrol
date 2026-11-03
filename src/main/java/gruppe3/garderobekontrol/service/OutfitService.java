@@ -35,8 +35,8 @@ public class OutfitService {
                 rain ? Shoes.RAIN_BOOTS : Shoes.SNEAKERS);
 
         String explanation = chat.prompt()
-                .system("Say something insanely cool and funny, like you're a real cool and funny guy.")
-                .user("I am such a bored feller, if only someone super funny made a good joke..."
+                .system("Du hjælper forældre med at klæde børn på. Svar på dansk i 2-3 korte sætninger.")
+                .user("Vejret: %s, %.1f grader, vind %.1f m/s, nedbør %.1f mm. Barnets aktivitet er %s. Tøjet er %s. Forklar hvorfor det passer."
                         .formatted(w.weatherDescription(), w.temperature(), w.windSpeed(),
                                 w.precipitationAmount(), request.activity(), outfit))
                 .call()
