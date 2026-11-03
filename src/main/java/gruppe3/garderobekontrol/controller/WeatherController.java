@@ -20,6 +20,6 @@ public class WeatherController {
 
     @GetMapping
     public WeatherResponse getWeather(@ModelAttribute WeatherRequest request) { //ModelAttribute samler parametre fra URL'en og binder dem til WeatherRequest objektet.
-        return weatherService.getWeather(request);
+        return weatherService.getWeather();
     }
 }

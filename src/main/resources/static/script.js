@@ -7,7 +7,7 @@ const submitButton = document.querySelector("#submitButton");
 
 async function loadWeather() {
     try {
-        const response = await fetch("/api/weather");
+        const response = await fetch("http://localhost:8080/api/weather");
 
         if (!response.ok) {
             throw new Error("Could not fetch weather");
@@ -81,7 +81,7 @@ function getOutfitData() {
 }
 
 async function getOutfitRecommendation(outfitData) {
-    const response = await fetch("/api/outfit", {
+    const response = await fetch("http://localhost:8080/api/outfit", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
