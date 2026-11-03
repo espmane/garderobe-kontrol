@@ -1,6 +1,6 @@
 package gruppe3.garderobekontrol.controller;
 
-import gruppe3.garderobekontrol.model.dto.response.WeatherResponse;
+import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
 import gruppe3.garderobekontrol.service.WeatherService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +14,7 @@ public class WeatherController {
     }
 
     @GetMapping("/api/weather")
-    public WeatherResponse getWeather() {
+    public OpenMeteoResponse getWeather() {
         return service.getWeather();
     }
 
