@@ -1,5 +1,6 @@
 package gruppe3.garderobekontrol.service;
 
+import gruppe3.garderobekontrol.client.WeatherClient;
 import org.springframework.stereotype.Service;
 
 @Service

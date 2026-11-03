@@ -1,12 +1,13 @@
-package gruppe3.garderobekontrol.service;
+package gruppe3.garderobekontrol.client;
 
 import gruppe3.garderobekontrol.model.dto.response.WeatherResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-@Service
+@Component
 public class WeatherClient {
     private final RestClient client;
 
