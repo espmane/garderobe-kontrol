@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
+import java.util.List;
+
+@Component
 public class WeatherClient {
     private final RestClient client;
 

@@ -17,5 +17,4 @@ public class WeatherController {
     public OpenMeteoResponse getWeather() {
         return service.getWeather();
     }
-
 }
