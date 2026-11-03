@@ -25,7 +25,7 @@ public class OutfitService {
         Weather w = weatherService.getWeather();
 
         boolean cold = w.temp() < 5;
-        boolean rain = w.rainRate() > 0,1;
+        boolean rain = w.rainRate() > 0.1;
 
     Outfit outfit = new Outfit(
             cold ? Headwear.HUE : Headwear.KASKET,

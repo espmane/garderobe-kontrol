@@ -1,6 +1,7 @@
 package gruppe3.garderobekontrol.service;
 
 import gruppe3.garderobekontrol.model.Location;
+import gruppe3.garderobekontrol.model.dto.response.DmiResponse;
 import gruppe3.garderobekontrol.model.dto.response.WeatherResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -28,18 +29,17 @@ public class WeatherClient {
         );
     }
 
-    public WeatherResponse fetch(Location location) {
+    public DmiResponse fetch(Location location) {
         return client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/forecastedr/collections/harmonie_dini_sf/position")
-                        .queryParam("coords",
-                                "POINT(" + location.getLatitude() + " " + location.getLongitude() + ")")
+                        .queryParam("coords", "{coords}")
                         .queryParam("crs", "crs84")
-                        .queryParam("parameter-name",
-                                String.join(",", PARAMETERS))
+                        .queryParam("parameter-name", String.join(",", PARAMETERS))
                         .queryParam("f", "GeoJSON")
-                        .build())
+                        .build("POINT(" + location.getLongitude() + " " + location.getLatitude() + ")"))
                 .retrieve()
-                .body(WeatherResponse.class);
+                .body(DmiResponse.class);
     }
-}
+    }
+
