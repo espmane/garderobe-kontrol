@@ -1,348 +1,217 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="da">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="widt=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnets Gaderobe Guide</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
 
-<header>
-    <h1> Barnets Gaderobe Guide</h1>
-    <p>Find det rigtige tøj til dit barn</p>
+<header class="site-header">
+    <div class="cloud cloud-left"></div>
+    <img src="logo.png" alt="Barnets Gaderobe Guide" class="site-logo">
+    <div class="cloud cloud-right"></div>
 </header>
 
 <main>
-    <section class="card weather-section">
-        <h2>Dagens vejr</h2>
-        <div id="weather">
+    <section class="weather-card" aria-labelledby="weather-title">
+        <div class="weather-heading">
+            <span class="section-icon">☀️</span>
+            <div>
+                <h2 id="weather-title">Dagens vejr</h2>
+                <p>I dag i nærheden</p>
+            </div>
+        </div>
+        <div id="weather" class="weather-content" aria-live="polite">
             <p>Henter dagens vejr...</p>
         </div>
     </section>
 
-    <section class="card">
-        <h2>Oplysninger om dit barn</h2>
+    <form id="outfitForm" class="main-card">
+        <h2 class="section-heading">
+            Oplysninger om dit barn
+        </h2>
 
-        <form id="outfitForm">
+        <div class="activity-grid">
+            <fieldset class="choice-section">
+                <legend>🏃 Aktivitetsniveau</legend>
+                <div class="choice-grid three-options">
+                    <label class="choice-card">
+                        <input type="radio" name="activity" value="CRAWLING" required>
+                        <span class="choice-icon">👶</span>
+                        <span>Kravlende</span>
+                    </label>
 
-            <div class="activity-grid">
+                    <label class="choice-card">
+                        <input type="radio" name="activity" value="BEGINNER">
+                        <span class="choice-icon">🚶</span>
+                        <span>Begynder</span>
+                    </label>
 
-            <fieldset>
-                <legend>Aktivitetsniveau</legend>
-
-                <label>
-                    <input type="radio" name="activity"
-                           value="CRAWLING">
-                    Kravlende
-                </label>
-
-                <label>
-                    <input type="radio" name="activity"
-                           value="BEGINNER" required>
-                    Begynder
-                </label>
-
-
-                <label>
-                    <input type="radio" name="activity"
-                           value="STABLE">
-                    Stabil
-                </label>
+                    <label class="choice-card">
+                        <input type="radio" name="activity" value="STABLE">
+                        <span class="choice-icon">🏃</span>
+                        <span>Stabil</span>
+                    </label>
+                </div>
             </fieldset>
 
-            <fieldset>
-                <legend>Skal barnet være udenfor?</legend>
+            <fieldset class="choice-section">
+                <legend>🌳 Skal barnet være udendørs?</legend>
+                <div class="choice-grid two-options">
+                    <label class="choice-card">
+                        <input type="radio" name="dayType" value="OUTDOOR" required>
+                        <span class="choice-icon">🌳</span>
+                        <span>Ja, udendørs</span>
+                    </label>
 
-                <label>
-                    <input type="radio" name="dayType"
-                           value="OUTDOOR" required>
-                    Ja, udendørs
-                </label>
-
-                <label>
-                    <input type="radio" name="dayType"
-                           value="INDOOR">
-                    Nej, indendørs
-                </label>
+                    <label class="choice-card">
+                        <input type="radio" name="dayType" value="INDOOR">
+                        <span class="choice-icon">🏠</span>
+                        <span>Nej, indendørs</span>
+                    </label>
+                </div>
             </fieldset>
+        </div>
 
-            </div>
-
-            <h2>Hvilket tøj har i allerede?</h2>
+        <div class="clothing-heading">
+            <h2 class="section-heading">
+                Hvilket tøj har I allerede?
+            </h2>
             <p>Vælg det tøj, barnet har til rådighed</p>
+        </div>
 
-            <div class="clothing-grid">
-
-            <fieldset>
+        <div class="clothing-grid">
+            <fieldset class="clothing-card">
                 <legend>Tilbehør</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox" name="accessories"
-                               value="NECK_WARMER">
-                        Halsedisse
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="accessories"
-                               value="MITTENS">
-                        Luffer
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="accessories"
-                               value="GLOVES">
-                        Handsker
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🧣</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="accessories" value="NECK_WARMER"> Halsedisse</label>
+                        <label><input type="checkbox" name="accessories" value="MITTENS"> Luffer</label>
+                        <label><input type="checkbox" name="accessories" value="GLOVES"> Handsker</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Inderste lag</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="baseLayer"
-                               value="BODY">
-                        Body
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="baseLayer"
-                               value="TIGHTS">
-                        Strømpebukser
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="baseLayer"
-                               value="SOCKS">
-                        Strømper
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="baseLayer"
-                               value="WOOL_BASE_LAYER">
-                        Uldundertøj
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🧦</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="baseLayer" value="BODY"> Body</label>
+                        <label><input type="checkbox" name="baseLayer" value="UNDERWEAR"> Undertøj</label>
+                        <label><input type="checkbox" name="baseLayer" value="TIGHTS"> Strømpebukser</label>
+                        <label><input type="checkbox" name="baseLayer" value="SOCKS"> Strømper</label>
+                        <label><input type="checkbox" name="baseLayer" value="WOOL_BASE_LAYER"> Uldundertøj</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
-                <legend>Hovedbelædning</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="headwear"
-                               value="KASKET">
-                        Kasket
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="headwear"
-                               value="HUE">
-                        Hue
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="headwear"
-                               value="BØLLEHAT">
-                        Bøllehat
-                    </label>
+            <fieldset class="clothing-card">
+                <legend>Hovedbeklædning</legend>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🧢</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="headwear" value="KASKET"> Kasket</label>
+                        <label><input type="checkbox" name="headwear" value="HUE"> Hue</label>
+                        <label><input type="checkbox" name="headwear" value="BØLLEHAT"> Bøllehat</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Jakker</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="jacket"
-                               value="RAIN_JACKET">
-                        Regnjakke
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="jacket"
-                               value="WINTER_JACKET">
-                        Vinterjakke
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="jacket"
-                               value="LIGHT_JACKET">
-                        Let jakke
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🧥</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="jacket" value="RAIN_JACKET"> Regnjakke</label>
+                        <label><input type="checkbox" name="jacket" value="WINTER_JACKET"> Vinterjakke</label>
+                        <label><input type="checkbox" name="jacket" value="LIGHT_JACKET"> Let jakke</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Mellemlag</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="midtLayer"
-                               value="SHIRT">
-                        Trøje
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="midtLayer"
-                               value="SWEATER">
-                        Sweater
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="midtLayer"
-                               value="FLEECE">
-                        Fleecetrøje
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="midtLayer"
-                               value="THERMAL_CLOTHING">
-                        Termotøj
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🧶</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="midtLayer" value="SHIRT"> Trøje</label>
+                        <label><input type="checkbox" name="midtLayer" value="SWEATER"> Sweater</label>
+                        <label><input type="checkbox" name="midtLayer" value="FLEECE"> Fleecetrøje</label>
+                        <label><input type="checkbox" name="midtLayer" value="THERMAL_CLOTHING"> Termotøj</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Bukser</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="pants"
-                               value="SHORTS">
-                        Shorts
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="pants"
-                               value="REGULAR_PANTS">
-                        Almindelige bukser
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="pants"
-                               value="RAIN_PANTS">
-                        Regnbukser
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="pants"
-                               value="WINTER_PANTS">
-                        Vinterbukser
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">👖</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="pants" value="SHORTS"> Shorts</label>
+                        <label><input type="checkbox" name="pants" value="REGULAR_PANTS"> Almindelige bukser</label>
+                        <label><input type="checkbox" name="pants" value="RAIN_PANTS"> Regnbukser</label>
+                        <label><input type="checkbox" name="pants" value="WINTER_PANTS"> Vinterbukser</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Overdele</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="shirt"
-                               value="T_SHIRT">
-                        T-shirt
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="shirt"
-                               value="LONG_SLEEVE">
-                        Langærmet trøje
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="shirt"
-                               value="SWEATER">
-                        Sweater
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">👕</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="shirt" value="T_SHIRT"> T-shirt</label>
+                        <label><input type="checkbox" name="shirt" value="LONG_SLEEVE"> Langærmet trøje</label>
+                        <label><input type="checkbox" name="shirt" value="SWEATER"> Sweater</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Fodtøj</legend>
-
-                <div class="checkbox-grid">
-                    <label>
-                        <input type="checkbox"
-                               name="shoes"
-                               value="SNEAKERS">
-                        Sneakers
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="shoes"
-                               value="RAIN_BOOTS">
-                        Gummistøvler
-                    </label>
-
-                    <label>
-                        <input type="checkbox"
-                               name="shoes"
-                               value="WINTER_BOOTS">
-                        Vinterstøvler
-                    </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">👢</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="shoes" value="SNEAKERS"> Sneakers</label>
+                        <label><input type="checkbox" name="shoes" value="RAIN_BOOTS"> Gummistøvler</label>
+                        <label><input type="checkbox" name="shoes" value="WINTER_BOOTS"> Vinterstøvler</label>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset>
+            <fieldset class="clothing-card">
                 <legend>Ekstra oplysninger</legend>
-
-                <label>
-                    <input type="checkbox"
-                           id="creativeDay">
-                    Kreativ dag (undgå sart tøj)
-                </label>
-
-                <label>
-                    <input type="checkbox"
-                           id="extraClothes">
-                    Barnet skal have ekstra skiftetøj
-                </label>
+                <div class="clothing-content">
+                    <span class="clothing-icon">🎨</span>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" id="creativeDay"> Kreativ dag (undgå sart tøj)</label>
+                        <label><input type="checkbox" id="extraClothes"> Barnet skal have ekstra skiftetøj</label>
+                    </div>
+                </div>
             </fieldset>
-            </div>
-            <button type="submit" id="submitButton">
-                Find passende tøj
-            </button>
+        </div>
 
-        </form>
-    </section>
+        <button type="submit" id="submitButton" class="recommend-button">
+            <span>♧</span>
+            Find passende tøj
+            <span>→</span>
+        </button>
+    </form>
 
-    <section class="card result-seciton" id="result" hidden>
-        <h2>Anbefalet påklædning</h2>
-
-        <div id="recommedation"></div>
+    <section class="result-section" id="result" hidden aria-live="polite">
+        <h2>✅ Anbefalet påklædning</h2>
+        <div id="recommendation"></div>
     </section>
 </main>
 
 <footer>
-    <p>Barnets Gaderobe Guide</p>
+    <p>Barnets Gaderobe Guide – Den rette påklædning i al slags vejr</p>
 </footer>
 
 </body>
