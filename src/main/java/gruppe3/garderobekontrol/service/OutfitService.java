@@ -28,10 +28,13 @@ public class OutfitService {
         boolean rain = w.daily().precipitation().getFirst() > 1.0;   // mm på hele dagen
 
         Outfit outfit = new Outfit(
-                cold ? Headwear.HUE : Headwear.KASKET,
+                cold ? Headwear.BEANIE : Headwear.CAP,
+                cold ? Accessories.NECK_WARMER : Accessories.SUN_PROTECTION,
+                BaseLayer.WOOL_BASE_LAYER,
+                MidtLayer.FLEECE,
                 cold ? Jacket.WINTER_JACKET : rain ? Jacket.RAIN_JACKET : Jacket.LIGHT_JACKET,
-                cold ? Shirt.SWEATER : Shirt.LONG_SLEEVE,
-                cold ? Pants.WINTER_PANTS : rain ? Pants.RAIN_PANTS : Pants.REGULAR_PANTS,
+                cold ? Shirt.LONG_SLEEVE : Shirt.T_SHIRT,
+                cold ? Pants.THERMAL_PANTS : rain ? Pants.RAIN_PANTS : Pants.REGULAR_PANTS,
                 rain ? Shoes.RAIN_BOOTS : Shoes.SNEAKERS);
 
         String explanation = chat.prompt()

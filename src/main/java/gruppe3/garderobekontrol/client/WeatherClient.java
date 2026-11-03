@@ -2,11 +2,9 @@ package gruppe3.garderobekontrol.service;
 
 import gruppe3.garderobekontrol.model.Location;
 import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-@Service
-import java.util.List;
 
 @Component
 public class WeatherClient {
