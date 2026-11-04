@@ -32,7 +32,7 @@ function displayWeather(weather) {
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
-    temperature.textContent = `${weather.temperature}°C`;
+    temperature.textContent = `${weather.hourly.temperature_2m[0]}°C`;
 
     const description = document.createElement("p");
     description.textContent = weather.description ?? "Dagens vejr";

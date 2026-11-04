@@ -1,16 +1,21 @@
 package gruppe3.garderobekontrol.service;
 
 import gruppe3.garderobekontrol.client.WeatherClient;
+import gruppe3.garderobekontrol.model.Location;
+import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
+import gruppe3.garderobekontrol.model.enums.City;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WeatherService {
+    private final WeatherClient client;
 
-    private final WeatherClient weatherClient;
-
-    public WeatherService(WeatherClient weatherClient) {
-
-        return weatherClient.fetch();
+    public WeatherService(WeatherClient client) {
+        this.client = client;
     }
 
+    // Skal ændres så lokation ikke er en hardkodet værdi
+    public OpenMeteoResponse getWeather() {
+        return client.fetch(new Location(City.COPENHAGEN));
+    }
 }
