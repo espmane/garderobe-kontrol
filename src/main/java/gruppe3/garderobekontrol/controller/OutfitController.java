@@ -15,7 +15,7 @@ public class OutfitController {
         this.service = service;
     }
 
-    @PostMapping("/api/weather/demo")
+    @PostMapping("/api/outfit")
     public OutfitResponse recommend(@RequestBody OutfitRequest request) {
         return service.recommend(request);
     }

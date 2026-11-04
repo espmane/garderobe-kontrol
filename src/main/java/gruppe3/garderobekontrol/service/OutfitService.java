@@ -37,15 +37,13 @@ public class OutfitService {
                 cold ? Pants.THERMAL_PANTS : rain ? Pants.RAIN_PANTS : Pants.REGULAR_PANTS,
                 rain ? Shoes.RAIN_BOOTS : Shoes.SNEAKERS);
 
-        String explanation = chat.prompt()
+        return chat.prompt()
                 .system("Du hjælper forældre med at klæde børn på. Svar på dansk i 2-3 korte sætninger.")
                 .user("Vejret: %s, %.1f grader, vind %.1f m/s, nedbør %.1f mm. Barnets aktivitet er %s. Tøjet er %s. Forklar hvorfor det passer."
                         .formatted(OpenMeteoResponse.describe(w.daily().weatherCode().getFirst()), w.hourly().temperature().getFirst(), w.hourly().windSpeed().getFirst(),
                                 w.daily().precipitation().getFirst(), request.activity(), outfit))
                 .call()
-                .content();
-
-        return new OutfitResponse(outfit, List.of(), explanation);
+                .entity(OutfitResponse.class, ChatClient.EntityParamSpec::useProviderStructuredOutput);
     }
 }
 
