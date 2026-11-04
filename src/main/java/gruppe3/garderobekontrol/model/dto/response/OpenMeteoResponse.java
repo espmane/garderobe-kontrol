@@ -1,29 +1,35 @@
 package gruppe3.garderobekontrol.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record OpenMeteoResponse(Hourly hourly, Daily daily) {
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Hourly(
-            @JsonProperty("temperature_2m") List<Double> temperature,
-            @JsonProperty("relative_humidity_2m") List<Integer> humidity,
-            @JsonProperty("wind_speed_10m") List<Double> windSpeed
-    ) {
+    @JsonGetter("description")
+    public String description() {
+        return daily.weatherCode().stream()
+                .findFirst()
+                .map(OpenMeteoResponse::describe)
+                .orElse("Ukendt");
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Hourly(
+            @JsonAlias("temperature_2m") List<Double> temperature,
+            @JsonAlias("relative_humidity_2m") List<Integer> humidity,
+            @JsonAlias("wind_speed_10m") List<Double> windSpeed
+    ) {}
+
     public record Daily(
-            @JsonProperty("uv_index_max") List<Double> uvIndex,
-            @JsonProperty("precipitation_sum") List<Double> precipitation,
-            @JsonProperty("snowfall_sum") List<Double> snowfall,
-            @JsonProperty("weather_code") List<Integer> weatherCode
-    ) {
-    }
+            @JsonAlias("uv_index_max") List<Double> uvIndex,
+            @JsonAlias("precipitation_sum") List<Double> precipitation,
+            @JsonAlias("snowfall_sum") List<Double> snowfall,
+            @JsonAlias("weather_code") List<Integer> weatherCode
+    ) {}
+
     public static String describe(int code) {
         return switch (code) {
             case 0 -> "Klart";

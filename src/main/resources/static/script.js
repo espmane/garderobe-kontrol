@@ -1,4 +1,3 @@
-
 const form = document.querySelector("#outfitForm");
 const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
@@ -32,13 +31,13 @@ function displayWeather(weather) {
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
-    temperature.textContent = `${weather.hourly.temperature_2m[0]}°C`;
+    temperature.textContent = `${weather.hourly.temperature[0]}°C`;
 
     const description = document.createElement("p");
     description.textContent = weather.description ?? "Dagens vejr";
 
     const wind = document.createElement("p");
-    wind.textContent = `Vind: ${weather.windSpeed} m/s`;
+    wind.textContent = `Vind: ${weather.hourly.windSpeed[0]} m/s`;
 
     details.append(temperature, description, wind);
     weatherInfo.append(details);
@@ -63,20 +62,24 @@ function getSelectedRadio(name) {
     return selected ? selected.value : null;
 }
 
-function getOutfitData() {
+function buildOutfitRequest() {
     return {
         activity: getSelectedRadio("activity"),
         dayType: getSelectedRadio("dayType"),
+        availableClothes: getSelectedOutfit()
+    };
+}
+
+function getSelectedOutfit() {
+    return {
+        headwear: getSelectedValues("headwear"),
         accessories: getSelectedValues("accessories"),
         baseLayer: getSelectedValues("baseLayer"),
-        headwear: getSelectedValues("headwear"),
-        jacket: getSelectedValues("jacket"),
         midtLayer: getSelectedValues("midtLayer"),
-        pants: getSelectedValues("pants"),
+        jacket: getSelectedValues("jacket"),
         shirt: getSelectedValues("shirt"),
-        shoes: getSelectedValues("shoes"),
-        creativeDay: document.querySelector("#creativeDay").checked,
-        extraClothes: document.querySelector("#extraClothes").checked
+        pants: getSelectedValues("pants"),
+        shoes: getSelectedValues("shoes")
     };
 }
 
@@ -93,18 +96,50 @@ async function getOutfitRecommendation(outfitData) {
         throw new Error("Could not get outfit recommendation");
     }
 
-    return await response.text();
+    return await response.json();
 }
 
 function displayRecommendation(result) {
-    recommendation.textContent = result;
+    recommendation.replaceChildren();
+
+    const outfit = result.recommendedOutfit;
+    const categories = {
+        headwear: "Hovedbeklædning",
+        accessories: "Tilbehør",
+        baseLayer: "Inderste lag",
+        midtLayer: "Mellemlag",
+        jacket: "Jakke",
+        shirt: "Trøje",
+        pants: "Bukser",
+        shoes: "Sko"
+    };
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Anbefalet outfit";
+
+    const list = document.createElement("ul");
+
+    for (const key in categories) {
+        const item = document.createElement("li");
+        if (outfit[key].length === 0) {
+            item.textContent = `${categories[key]}: ingenting`;
+        } else {
+            item.textContent = `${categories[key]}: ${outfit[key]}`;
+        }
+        list.appendChild(item);
+    }
+
+    const explanation = document.createElement("p");
+    explanation.textContent = result.explanation;
+
+    recommendation.append(heading, explanation, list);
     resultSection.hidden = false;
 }
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const outfitData = getOutfitData();
+    const outfitData = buildOutfitRequest();
 
     if (!outfitData.activity || !outfitData.dayType) {
         resultSection.hidden = false;

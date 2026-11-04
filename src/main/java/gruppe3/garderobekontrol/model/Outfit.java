@@ -2,14 +2,16 @@ package gruppe3.garderobekontrol.model;
 
 import gruppe3.garderobekontrol.model.enums.*;
 
+import java.util.List;
+
 public record Outfit(
-        Headwear headwear,
-        Accessories accessories,
-        BaseLayer baseLayer,
-        MidtLayer midtLayer,
-        Jacket jacket,
-        Shirt shirt,
-        Pants pants,
-        Shoes shoes
+        List<Headwear> headwear,
+        List<Accessories> accessories,
+        List<BaseLayer> baseLayer,
+        List<MidtLayer> midtLayer,
+        List<Jacket> jacket,
+        List<Shirt> shirt,
+        List<Pants> pants,
+        List<Shoes> shoes
 ) {
 }
