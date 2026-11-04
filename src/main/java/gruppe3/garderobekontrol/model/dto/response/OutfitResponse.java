@@ -1,12 +1,11 @@
 package gruppe3.garderobekontrol.model.dto.response;
 
-import gruppe3.garderobekontrol.model.Outfit;
+import gruppe3.garderobekontrol.model.dto.ClothingSuggestion;
 
 import java.util.List;
 
 public record OutfitResponse(
-        Outfit recommendedOutfit,
-        List<String> missingClothes,
+        List<ClothingSuggestion> recommendedClothes,
         String explanation
 ) {
 }

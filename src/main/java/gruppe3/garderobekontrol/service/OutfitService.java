@@ -1,14 +1,12 @@
+
 package gruppe3.garderobekontrol.service;
 
-import gruppe3.garderobekontrol.model.Outfit;
 import gruppe3.garderobekontrol.model.dto.request.OutfitRequest;
 import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
 import gruppe3.garderobekontrol.model.dto.response.OutfitResponse;
-import gruppe3.garderobekontrol.model.enums.*;
+import gruppe3.garderobekontrol.model.enums.City;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class OutfitService {
@@ -22,29 +20,123 @@ public class OutfitService {
     }
 
     public OutfitResponse recommend(OutfitRequest request) {
-        OpenMeteoResponse w = weatherService.getWeather();
 
-        boolean cold = w.hourly().temperature().getFirst() < 5;
-        boolean rain = w.daily().precipitation().getFirst() > 1.0;   // mm på hele dagen
-
-        Outfit outfit = new Outfit(
-                cold ? Headwear.BEANIE : Headwear.CAP,
-                cold ? Accessories.NECK_WARMER : Accessories.SUN_PROTECTION,
-                BaseLayer.WOOL_BASE_LAYER,
-                MidtLayer.FLEECE,
-                cold ? Jacket.WINTER_JACKET : rain ? Jacket.RAIN_JACKET : Jacket.LIGHT_JACKET,
-                cold ? Shirt.LONG_SLEEVE : Shirt.T_SHIRT,
-                cold ? Pants.THERMAL_PANTS : rain ? Pants.RAIN_PANTS : Pants.REGULAR_PANTS,
-                rain ? Shoes.RAIN_BOOTS : Shoes.SNEAKERS);
+        OpenMeteoResponse w = weatherService.getWeather(
+                request.latitude(),
+                request.longitude()
+        );
 
         return chat.prompt()
-                .system("Du hjælper forældre med at klæde børn på. Svar på dansk i 2-3 korte sætninger.")
-                .user("Vejret: %s, %.1f grader, vind %.1f m/s, nedbør %.1f mm. Barnets aktivitet er %s. Tøjet er %s. Forklar hvorfor det passer."
-                        .formatted(OpenMeteoResponse.describe(w.daily().weatherCode().getFirst()), w.hourly().temperature().getFirst(), w.hourly().windSpeed().getFirst(),
-                                w.daily().precipitation().getFirst(), request.activity(), outfit))
+
+                .system("""
+                        Du er en garderobeassistent, der hjælper forældre
+                        med at vurdere, hvilket tøj deres barn mangler.
+
+                        DIN OPGAVE:
+                        Vurder barnets behov for beklædning ud fra vejret,
+                        barnets motoriske udviklingsniveau, dagstypen
+                        og familiens eksisterende garderobe.
+
+                        MOTORISK UDVIKLINGSNIVEAU:
+                        CRAWLING: Barnet kravler. Tag hensyn til bevægelsesfrihed
+                        og kontakt med underlaget.
+                        
+                        BEGINNER: Barnet er begyndt at gå. Tag hensyn til,
+                        at barnet både kan kravle og gå.
+                        
+                        STABLE: Barnet går stabilt. Tag hensyn til aktiv
+                        bevægelse og leg.
+
+                        DAGSTYPE:
+                        INDOOR: Barnet opholder sig primært indendørs.
+                        OUTDOOR: Barnet opholder sig primært udendørs.
+                        Vurder derfor beklædningsbehovet forskelligt.
+
+                        BEKLÆDNINGSKATEGORIER:
+                        HEADWEAR: Hovedbeklædning.
+                        ACCESSORIES: Tilbehør.
+                        BASE_LAYER: Inderste lag.
+                        MIDT_LAYER: Mellemlag.
+                        JACKET: Jakker og yderlag.
+                        SHIRT: Trøjer.
+                        PANTS: Bukser.
+                        SHOES: Fodtøj.
+
+                        TILGÆNGELIGE BEKLÆDNINGSDELE:
+                        HEADWEAR: CAP, BEANIE, BUCKET_HAT,
+                        SUN_HAT, BALACLAVA, HEADBAND.
+
+                        ACCESSORIES: NECK_WARMER, MITTENS,
+                        GLOVES, SUN_PROTECTION.
+
+                        BASE_LAYER: BODY, UNDERWEAR, TIGHTS,
+                        SOCKS, WOOL_BASE_LAYER.
+
+                        MIDT_LAYER: SHIRT, SWEATER, FLEECE,
+                        THERMAL_CLOTHING.
+
+                        JACKET: RAIN_JACKET, WINTER_JACKET,
+                        LIGHT_JACKET, THERMAL_JACKET.
+
+                        SHIRT: T_SHIRT, LONG_SLEEVE.
+
+                        PANTS: SHORTS, REGULAR_PANTS,
+                        RAIN_PANTS, THERMAL_PANTS.
+
+                        SHOES: SNEAKERS, RAIN_BOOTS, WINTER_BOOTS,
+                        SANDALS, THERMAL_BOOTS, INDOOR_SHOES.
+
+                        REGLER FOR ANBEFALINGER:
+                        - Sammenlign altid barnets behov med familiens garderobe.
+                        - Foreslå ikke beklædningsdele, familien allerede har.
+                        - Foreslå kun beklædningsdele, der reelt er nødvendige.
+                        - Du behøver ikke foreslå noget fra alle kategorier.
+                        - Undgå unødvendige eller overdrevne anbefalinger.
+                        - Hvis familien allerede har alt det nødvendige,
+                          skal recommendedClothes være en tom liste.
+                        - Brug kun de kategorier og beklædningsdele,
+                          der er angivet ovenfor.
+                        - Returnér enum-værdierne præcist som skrevet.
+
+                        OUTPUT:
+                        Returnér en struktureret OutfitResponse.
+                        Hver anbefaling skal indeholde category, item og reason.
+                        explanation skal kort forklare den samlede vurdering.
+                        Svar på dansk.
+                        """)
+
+                .user("""
+                        Vejrforhold:
+                        Vejrbeskrivelse: %s
+                        Temperatur: %.1f grader
+                        Luftfugtighed: %d procent
+                        Vindhastighed: %.1f m/s
+                        Nedbør: %.1f mm
+                        UV-indeks: %.1f
+                        Snefald: %.1f cm
+
+                        Barnets motoriske udviklingsniveau: %s
+                        Dagstype: %s
+
+                        Familiens eksisterende garderobe:
+                        %s
+
+                        Vurder hvilke beklædningsdele familien mangler.
+                        """.formatted(
+                        OpenMeteoResponse.describe(w.daily().weatherCode().getFirst()),
+                        w.hourly().temperature().getFirst(),
+                        w.hourly().humidity().getFirst(),
+                        w.hourly().windSpeed().getFirst(),
+                        w.daily().precipitation().getFirst(),
+                        w.daily().uvIndex().getFirst(),
+                        w.daily().snowfall().getFirst(),
+                        request.activity(),
+                        request.dayType(),
+                        request.availableClothes()
+                ))
+
                 .call()
-                .entity(OutfitResponse.class, ChatClient.EntityParamSpec::useProviderStructuredOutput);
+                .entity(OutfitResponse.class,
+                        ChatClient.EntityParamSpec::useProviderStructuredOutput);
     }
 }
-
-
