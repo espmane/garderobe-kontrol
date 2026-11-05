@@ -1,4 +1,4 @@
-package gruppe3.garderobekontrol.model.enums;
+package gruppe3.garderobekontrol.model.enums.wardrobe;
 
 public enum BaseLayer {
     BODY,

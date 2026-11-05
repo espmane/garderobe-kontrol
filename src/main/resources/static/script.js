@@ -3,37 +3,38 @@ const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
+
 let userLatitude;
 let userLongitude;
 
 async function loadWeather() {
     navigator.geolocation.getCurrentPosition(async (position) => {
-    try {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+        try {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
 
-        userLatitude = latitude;
-        userLongitude = longitude;
+            userLatitude = latitude;
+            userLongitude = longitude;
 
-        const response = await fetch(
-            `/api/weather?latitude=${latitude}&longitude=${longitude}`
-        );
+            const response = await fetch(
+                `/api/weather?latitude=${latitude}&longitude=${longitude}`
+            );
 
-        if (!response.ok) {
-            throw new Error("Could not fetch weather");
+            if (!response.ok) {
+                throw new Error("Could not fetch weather");
+            }
+
+            const weather = await response.json();
+            displayWeather(weather);
+
+        } catch (error) {
+            console.error(error);
+            weatherContainer.textContent = "Kunne ikke hente dagens vejr.";
         }
-
-        const weather = await response.json();
-        displayWeather(weather);
-
-    } catch (error) {
+    }, (error) => {
         console.error(error);
-        weatherContainer.textContent = "Kunne ikke hente dagens vejr.";
-    }
-}, (error) => {
-    console.error(error);
-    weatherContainer.textContent = "Kunne ikke finde din lokation.";
-});
+        weatherContainer.textContent = "Kunne ikke finde din lokation.";
+    });
 }
 
 function displayWeather(weather) {
@@ -81,10 +82,9 @@ function buildOutfitRequest() {
     return {
         latitude: userLatitude,
         longitude: userLongitude,
-        activity: getSelectedRadio("activity"),
-        dayType: getSelectedRadio("dayType"),
-        creativeDay: document.querySelector("#creativeDay").checked,
-        extraClothes: document.querySelector("#extraClothes").checked,
+        mobilityLevel: getSelectedRadio("mobilityLevel"),
+        outdoorTime: getSelectedRadio("outdoorTime"),
+        dailyActivities: getSelectedValues("dailyActivities"),
         availableClothes: getSelectedOutfit()
     };
 }
@@ -94,9 +94,8 @@ function getSelectedOutfit() {
         headwear: getSelectedValues("headwear"),
         accessories: getSelectedValues("accessories"),
         baseLayer: getSelectedValues("baseLayer"),
-        midtLayer: getSelectedValues("midtLayer"),
-        jacket: getSelectedValues("jacket"),
-        shirt: getSelectedValues("shirt"),
+        midLayer: getSelectedValues("midLayer"),
+        outerLayer: getSelectedValues("outerLayer"),
         pants: getSelectedValues("pants"),
         shoes: getSelectedValues("shoes")
     };
@@ -104,6 +103,7 @@ function getSelectedOutfit() {
 
 async function getOutfitRecommendation(outfitData) {
     console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
+
     const response = await fetch("/api/outfit", {
         method: "POST",
         headers: {
@@ -135,27 +135,28 @@ function formatEnum(value) {
 
         BODY: "Body",
         UNDERWEAR: "Undertøj",
-        TIGHTS: "Strømpebukser",
+        TIGHTS: "Strømpebukser/Leggings",
         SOCKS: "Strømper",
         WOOL_BASE_LAYER: "Uldundertøj",
 
-        SHIRT: "Trøje",
+        T_SHIRT: "T-shirt",
+        LONG_SLEEVE_SHIRT: "Langærmet t-shirt",
         SWEATER: "Sweater",
         FLEECE: "Fleece",
-        THERMAL_CLOTHING: "Termotøj",
+        THERMAL_SHIRT: "Termotrøje",
 
         RAIN_JACKET: "Regnjakke",
         WINTER_JACKET: "Vinterjakke",
         LIGHT_JACKET: "Let jakke",
         THERMAL_JACKET: "Termojakke",
-
-        T_SHIRT: "T-shirt",
-        LONG_SLEEVE: "Langærmet trøje",
+        SOFTSHELL_JACKET: "Softshelljakke",
+        RAIN_PANTS: "Regnbukser",
+        THERMAL_PANTS: "Termobukser",
+        SNOWSUIT: "Flyverdragt",
 
         SHORTS: "Shorts",
         REGULAR_PANTS: "Almindelige bukser",
-        RAIN_PANTS: "Regnbukser",
-        THERMAL_PANTS: "Termobukser",
+        LEGGINGS: "Leggings",
 
         SNEAKERS: "Sneakers",
         RAIN_BOOTS: "Gummistøvler",
@@ -168,80 +169,120 @@ function formatEnum(value) {
     return translations[value] ?? value;
 }
 
+
 function displayRecommendation(result) {
     recommendation.replaceChildren();
 
-    const outfit = result.recommendedOutfit;
     const categories = {
         headwear: "Hovedbeklædning",
         accessories: "Tilbehør",
         baseLayer: "Inderste lag",
-        midtLayer: "Mellemlag",
-        jacket: "Jakke",
-        shirt: "Trøje",
+        midLayer: "Mellemlag",
+        outerLayer: "Overtøj",
         pants: "Bukser",
-        shoes: "Sko"
+        shoes: "Fodtøj"
     };
 
-    const heading = document.createElement("h2");
-    heading.textContent = "Anbefalet outfit";
+    function displayOutfit(outfit, title) {
+        const items = [];
 
-    const list = document.createElement("ul");
+        for (const key in categories) {
+            const categoryItems = outfit?.[key] ?? [];
 
-    for (const key in categories) {
-        const item = document.createElement("li");
-        if (outfit[key].length === 0) {
-            item.textContent = `${categories[key]}: ingenting`;
-        } else {
-            item.textContent = `${categories[key]}: ${outfit[key].map(formatEnum).join(", ")}`;
+            if (categoryItems.length > 0) {
+                items.push({
+                    category: categories[key],
+                    clothes: categoryItems.map(formatEnum).join(", ")
+                });
+            }
         }
-        list.appendChild(item);
+
+        if (items.length === 0) {
+            return false;
+        }
+
+        const heading = document.createElement("h3");
+        heading.textContent = title;
+
+        const list = document.createElement("ul");
+
+        items.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${item.category}: ${item.clothes}`;
+            list.appendChild(listItem);
+        });
+
+        recommendation.append(heading, list);
+
+        return true;
     }
 
-    const explanation = document.createElement("p");
-    explanation.textContent = result.explanation;
+        const hasMissingClothes = displayOutfit(
+            result.recommendedOutfit, "Tøj, der mangler i gardaroben"
+    );
+        if (!hasMissingClothes) {
+            const message = document.createElement("p");
+            message.textContent = "Gardaroben ser ud til at dække barnets behov for denne dag.";
+            recommendation.appendChild(message);
 
-    recommendation.append(heading, explanation, list);
-    resultSection.hidden = false;
-}
+        }
 
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+        const hasExtraClothes = displayOutfit(
+            result.extraClothesToPack,
+            "Ekstra skiftetøj at medbringe"
+        );
 
-    const outfitData = buildOutfitRequest();
+        if (!hasExtraClothes) {
+            const message = document.createElement("p");
+            message.textContent = "Der vurderes ikke at være behov for ekstra skiftetøj.";
+            recommendation.appendChild(message);
+        }
 
-    if (userLatitude == null || userLongitude == null) {
-        recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
-        return;
+        const explanation = document.createElement("p");
+        explanation.textContent = result.explanation ?? "";
+        recommendation.appendChild(explanation);
+
+        resultSection.hidden = false;
     }
 
-    if (!outfitData.activity || !outfitData.dayType) {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const outfitData = buildOutfitRequest();
+
+        if (userLatitude == null || userLongitude == null) {
+            recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
+            resultSection.hidden = false;
+            return;
+        }
+
+        if (!outfitData.mobilityLevel || !outfitData.outdoorTime) {
+            resultSection.hidden = false;
+            recommendation.textContent =
+                "Vælg barnets motoriske niveau og tid indendørs/udendørs.";
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Finder passende tøj...";
+
         resultSection.hidden = false;
         recommendation.textContent =
-            "Vælg aktivitetsniveau og om barnet skal være inde eller ude.";
-        return;
-    }
+            "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
 
-    submitButton.disabled = true;
-    submitButton.textContent = "Finder passende tøj...";
+        try {
+            const result = await getOutfitRecommendation(outfitData);
+            displayRecommendation(result);
 
-    resultSection.hidden = false;
-    recommendation.textContent =
-        "Vi finder den bedste påklædning til dit barn...";
+        } catch (error) {
+            console.error(error);
+            recommendation.textContent =
+                "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
 
-    try {
-        const result = await getOutfitRecommendation(outfitData);
-        displayRecommendation(result);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Find passende tøj";
+        }
+    });
 
-    } catch (error) {
-        console.error(error);
-        recommendation.textContent =
-            "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
-
-    } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = "Find passende tøj";
-    }
-});
-
-loadWeather();
+    loadWeather();
