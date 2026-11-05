@@ -3,10 +3,21 @@ const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
+let userLatitude;
+let userLongitude;
 
 async function loadWeather() {
+    navigator.geolocation.getCurrentPosition(async (position) => {
     try {
-        const response = await fetch("/api/weather");
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        userLatitude = latitude;
+        userLongitude = longitude;
+
+        const response = await fetch(
+            `/api/weather?latitude=${latitude}&longitude=${longitude}`
+        );
 
         if (!response.ok) {
             throw new Error("Could not fetch weather");
@@ -19,6 +30,10 @@ async function loadWeather() {
         console.error(error);
         weatherContainer.textContent = "Kunne ikke hente dagens vejr.";
     }
+}, (error) => {
+    console.error(error);
+    weatherContainer.textContent = "Kunne ikke finde din lokation.";
+});
 }
 
 function displayWeather(weather) {
@@ -64,8 +79,12 @@ function getSelectedRadio(name) {
 
 function buildOutfitRequest() {
     return {
+        latitude: userLatitude,
+        longitude: userLongitude,
         activity: getSelectedRadio("activity"),
         dayType: getSelectedRadio("dayType"),
+        creativeDay: document.querySelector("#creativeDay").checked,
+        extraClothes: document.querySelector("#extraClothes").checked,
         availableClothes: getSelectedOutfit()
     };
 }
@@ -99,6 +118,12 @@ async function getOutfitRecommendation(outfitData) {
     return await response.json();
 }
 
+function formatEnum(value) {
+    return value.toLowerCase()
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+}
+
 function displayRecommendation(result) {
     recommendation.replaceChildren();
 
@@ -124,7 +149,7 @@ function displayRecommendation(result) {
         if (outfit[key].length === 0) {
             item.textContent = `${categories[key]}: ingenting`;
         } else {
-            item.textContent = `${categories[key]}: ${outfit[key]}`;
+            item.textContent = `${categories[key]}: ${outfit[key].map(formatEnum).join(", ")}`;
         }
         list.appendChild(item);
     }
@@ -140,6 +165,11 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const outfitData = buildOutfitRequest();
+
+    if (userLatitude == null || userLongitude == null) {
+        recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
+        return;
+    }
 
     if (!outfitData.activity || !outfitData.dayType) {
         resultSection.hidden = false;

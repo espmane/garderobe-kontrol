@@ -1,7 +1,5 @@
 package gruppe3.garderobekontrol.model;
 
-import gruppe3.garderobekontrol.model.enums.City;
-
 public class Location {
 
     private final double LONGITUDE;

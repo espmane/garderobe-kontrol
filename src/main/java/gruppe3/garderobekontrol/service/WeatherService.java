@@ -3,7 +3,6 @@ package gruppe3.garderobekontrol.service;
 import gruppe3.garderobekontrol.client.WeatherClient;
 import gruppe3.garderobekontrol.model.Location;
 import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
-import gruppe3.garderobekontrol.model.enums.City;
 import org.springframework.stereotype.Service;
 
 @Service
