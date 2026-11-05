@@ -12,10 +12,12 @@ public class OutfitService {
 
     private final ChatClient chat;
     private final WeatherService weatherService;
+    private final TomatoTools tomatoThrowingMachine;
 
-    public OutfitService(ChatClient.Builder builder, WeatherService weatherService) {
+    public OutfitService(ChatClient.Builder builder, WeatherService weatherService, TomatoTools tools) {
         this.chat = builder.build();
         this.weatherService = weatherService;
+        this.tomatoThrowingMachine = tools;
     }
 
     public OutfitResponse recommend(OutfitRequest request) {
@@ -47,6 +49,8 @@ public class OutfitService {
                         - Returnér en forklaring i explanation.
                         - Forklaringen skal bestå af 2-3 korte sætninger på dansk.
                         - Begrund valgene med udgangspunkt i barnets situation og vejrforhold.
+                        
+                        - KUN hvis vejret er dårligt skal du kaste en tomat.
                         """)
                 .user("""
                         Lav en personlig tøj anbefaling til barnet baseret på følgende situation.
@@ -92,6 +96,7 @@ public class OutfitService {
                         clothes.pants(),
                         clothes.shoes()
                 ))
+                .tools(tomatoThrowingMachine)
                 .call()
                 .entity(OutfitResponse.class, ChatClient.EntityParamSpec::useProviderStructuredOutput);
     }

@@ -4,6 +4,37 @@ const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
 
+const socket = new WebSocket("ws://localhost:8080/ws")
+
+socket.onmessage = () => throwTomato();
+
+function throwTomato() {
+    const tomato = document.getElementById("tomato-animation");
+    const splat = document.getElementById("tomato-splat");
+
+    tomato.style.display = splat.style.display = "block";
+    splat.style.opacity = 0;
+
+    tomato.animate([
+        {opacity: 0, transform: "translate(0, 0) scale(.025) rotate(0deg)"},
+        {opacity: 1, transform: "translate(-18vw, -12vh) scale(.22) rotate(360deg)", offset: .22},
+        {transform: "translate(-35vw, -30vh) scale(2) rotate(950deg)", offset: .58},
+        {opacity: 1, transform: "translate(-50vw, -50vh) scale(13) rotate(1620deg)"}
+    ], {
+        duration: 1350,
+        easing: "linear",
+        fill: "forwards"
+    }).onfinish = () => {
+        tomato.style.display = "none";
+        splat.style.opacity = 1;
+
+        setTimeout(() => {
+            splat.style.opacity = 0;
+            setTimeout(() => splat.style.display = "none", 400);
+        }, 150);
+    };
+}
+
 async function loadWeather() {
     try {
         const response = await fetch("/api/weather");
