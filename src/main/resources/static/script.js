@@ -120,9 +120,52 @@ async function getOutfitRecommendation(outfitData) {
 }
 
 function formatEnum(value) {
-    return value.toLowerCase()
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, char => char.toUpperCase());
+    const translations = {
+        CAP: "Kasket",
+        BEANIE: "Hue",
+        BUCKET_HAT: "Bøllehat",
+        SUN_HAT: "Solhat",
+        BALACLAVA: "Elefanthue",
+        HEADBAND: "Pandebånd",
+
+        NECK_WARMER: "Halsedisse",
+        MITTENS: "Luffer",
+        GLOVES: "Handsker",
+        SUN_PROTECTION: "Solbeskyttelse",
+
+        BODY: "Body",
+        UNDERWEAR: "Undertøj",
+        TIGHTS: "Strømpebukser",
+        SOCKS: "Strømper",
+        WOOL_BASE_LAYER: "Uldundertøj",
+
+        SHIRT: "Trøje",
+        SWEATER: "Sweater",
+        FLEECE: "Fleece",
+        THERMAL_CLOTHING: "Termotøj",
+
+        RAIN_JACKET: "Regnjakke",
+        WINTER_JACKET: "Vinterjakke",
+        LIGHT_JACKET: "Let jakke",
+        THERMAL_JACKET: "Termojakke",
+
+        T_SHIRT: "T-shirt",
+        LONG_SLEEVE: "Langærmet trøje",
+
+        SHORTS: "Shorts",
+        REGULAR_PANTS: "Almindelige bukser",
+        RAIN_PANTS: "Regnbukser",
+        THERMAL_PANTS: "Termobukser",
+
+        SNEAKERS: "Sneakers",
+        RAIN_BOOTS: "Gummistøvler",
+        WINTER_BOOTS: "Vinterstøvler",
+        SANDALS: "Sandaler",
+        THERMAL_BOOTS: "Termostøvler",
+        INDOOR_SHOES: "Indesko"
+    };
+
+    return translations[value] ?? value;
 }
 
 function displayRecommendation(result) {

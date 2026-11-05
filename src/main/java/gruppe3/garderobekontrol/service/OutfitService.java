@@ -126,7 +126,11 @@ public class OutfitService {
                                       - Brug udelukkende de tilladte enum-værdier fra kategorierne ovenfor.
                                       - Returnér enum-værdierne præcist som angivet med store bogstaver
                                         og underscores. Eksempel: REGULAR_PANTS.
+                                      - Ved kreativ dag skal du prioritere praktisk og slidstærkt tøj, der kan tåle at blive beskidt.
+                                      - Ved behov for ekstra skiftetøj skal du vurdere, hvilke ekstra beklædningsdele der er nødvendige.
+                                      - undgå at anbefale flere beklædningsdele, der dækker samme behov, medmindre det er nødvendigt.
                                       - Opfind aldrig nye beklædningsdele eller kategorier.
+                                     
                         
                                       OUTPUT:
                         
