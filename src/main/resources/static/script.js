@@ -103,6 +103,7 @@ function getSelectedOutfit() {
 }
 
 async function getOutfitRecommendation(outfitData) {
+    console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
     const response = await fetch("/api/outfit", {
         method: "POST",
         headers: {
