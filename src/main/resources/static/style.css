@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 
 :root {
@@ -19,10 +18,9 @@ body {
     min-height: 100vh;
     font-family: 'Nunito', Arial, sans-serif;
     color: var(--text);
-    background:
-            radial-gradient(ellipse at 5% 10%, #ffffff99, transparent 25%),
-            radial-gradient(ellipse at 95% 20%, #ffffff88, transparent 25%),
-            linear-gradient(180deg, #c9eaff 0%, #e9f7ff 48%, #f2f9ff 100%);
+    background: radial-gradient(ellipse at 5% 10%, #ffffff99, transparent 25%),
+    radial-gradient(ellipse at 95% 20%, #ffffff88, transparent 25%),
+    linear-gradient(180deg, #c9eaff 0%, #e9f7ff 48%, #f2f9ff 100%);
 }
 
 .site-header {
@@ -512,4 +510,28 @@ footer {
     *::after {
         transition: none !important;
     }
+}
+
+#tomato-animation {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: 70px;
+    z-index: 99999;
+    will-change: transform, opacity;
+}
+
+#tomato-splat {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+            ellipse at center,
+            rgba(255, 35, 35, .95) 35%,
+            rgba(220, 0, 0, .75) 70%,
+            transparent 100%
+    );
 }

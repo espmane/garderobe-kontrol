@@ -1,9 +1,8 @@
 package gruppe3.garderobekontrol.service;
 
-import gruppe3.garderobekontrol.model.Outfit;
 import gruppe3.garderobekontrol.model.dto.request.OutfitRequest;
-import gruppe3.garderobekontrol.model.dto.response.OutfitResponse;
 import gruppe3.garderobekontrol.model.dto.response.OpenMeteoResponse;
+import gruppe3.garderobekontrol.model.dto.response.OutfitResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -12,87 +11,294 @@ public class OutfitService {
 
     private final ChatClient chat;
     private final WeatherService weatherService;
+    private final TomatoTools tomatoThrowingMachine;
 
-    public OutfitService(ChatClient.Builder builder, WeatherService weatherService) {
+    public OutfitService(ChatClient.Builder builder, WeatherService weatherService, TomatoTools tools) {
         this.chat = builder.build();
         this.weatherService = weatherService;
+        this.tomatoThrowingMachine = tools;
     }
 
     public OutfitResponse recommend(OutfitRequest request) {
-        OpenMeteoResponse weather = weatherService.getWeather();
-        Outfit clothes = request.availableClothes();
 
+        OpenMeteoResponse w = weatherService.getWeather(
+                request.latitude(),
+                request.longitude()
+        );
         return chat.prompt()
+
                 .system("""
-                        Du er en erfaren børnehavepædagog med ekspertise i børns påklædning og
-                        påklædning efter vejret.
+                        Du er en garderobeassistent, der hjælper forældre med
+                        at vurdere, hvilke beklædningsdele deres barn har behov
+                        for i institutionens garderobe.
                         
-                        Din opgave er at sammensætte et praktisk og passende outfit ud fra
-                        barnets situation, motoriske udvikling, vejrforhold og tilgængelige tøj.
+                        DIN OPGAVE:
                         
-                        Retningslinjer:
-                        - Vælg udelukkende tøj fra den angivne liste over tilgængeligt tøj.
-                        - Bevar tøjets ID'er præcis som de er angivet.
-                        - Vælg aldrig tøj, der ikke findes i den relevante kategori.
-                        - Tomme kategorier skal altid returneres som tomme lister.
-                        - Vælg kun de tøjdele, der er nødvendige for situationen.
-                        - Der må højst vælges én jakke og ét par sko.
-                        - Vurder behovet for hvert enkelt lag frem for automatisk at vælge alle lag.
-                        - Tag hensyn til temperatur, vind, nedbør og vejrbeskrivelse.
-                        - Ved indendørs ophold skal udendørs vejrforhold ignoreres.
-                        - Prioritér komfort, bevægelsesfrihed og funktionalitet.
+                        Vurder først barnets reelle behov for beklædning ud fra:
                         
-                        Svar:
-                        - Returnér alle otte kategorier i recommendedOutfit.
-                        - Returnér en forklaring i explanation.
-                        - Forklaringen skal bestå af 2-3 korte sætninger på dansk.
-                        - Begrund valgene med udgangspunkt i barnets situation og vejrforhold.
+                        - Vejrforholdene
+                        - Barnets motoriske udviklingsniveau
+                        - Hvor meget barnet skal være indendørs eller udendørs
+                        - Dagens aktiviteter
+                        
+                        Sammenlign derefter barnets behov med den registrerede
+                        garderobe i institutionen.
+                        
+                        Du skal identificere de beklædningsdele, der er
+                        relevante for dagen, men som ikke allerede fremgår
+                        af garderoben.
+                        
+                        MOTORISK UDVIKLINGSNIVEAU:
+                        
+                        CRAWLING:
+                        Barnet kravler primært. Prioritér bevægelsesfrihed,
+                        komfort og beskyttelse af knæ og ben ved udendørs leg.
+                        
+                        BEGINNER_WALKER:
+                        Barnet er begyndt at gå, men kan stadig kravle.
+                        Tøjet skal give plads til både kravl og gang.
+                        
+                        CONFIDENT_WALKER:
+                        Barnet går og løber stabilt.
+                        Tag hensyn til aktiv leg og bevægelse.
+                        
+                        OUTDOOR TIME:
+                        
+                        INDOOR:
+                        Barnet opholder sig primært indendørs.
+                        Vurder behovet ud fra almindelige indendørsforhold.
+                        Brug ikke udendørstemperaturen som barnets faktiske
+                        indendørstemperatur.
+                        
+                        Tag dog højde for, at barnet kan opholde sig på kolde
+                        gulve, især hvis det kravler eller leger på gulvet.
+                        Vurder derfor behovet for passende basislag og
+                        behageligt tøj uden at overophede barnet.
+                        
+                        Vejret kan også være relevant ved korte ture udenfor
+                        og overgange mellem inde og ude.
+                        
+                        INDOOR_OUTDOOR:
+                        Barnet opholder sig både indendørs og udendørs.
+                        Tøjet skal fungere i begge miljøer.
+                        Vurder behovet for overtøj og lag ud fra vejret og
+                        den forventede tid udendørs.
+                        
+                        OUTDOOR:
+                        Barnet opholder sig primært udendørs.
+                        Vurder påklædningen ud fra temperatur, vind,
+                        nedbør og UV-indeks.
+                        Tag højde for aktivitetens varighed og barnets
+                        motoriske niveau.
+                        
+                        DAGENS AKTIVITETER:
+                        
+                        WATER_PLAY:
+                        Tag højde for risikoen for vådt tøj.
+                        Overvej behovet for ekstra strømper, undertøj
+                        eller skiftetøj.
+                        
+                        Vandleg kan foregå både indendørs og udendørs.
+                        Antag derfor ikke automatisk, at barnet skal bruge
+                        regntøj eller andet udendørs overtøj.
+                        
+                        CREATIVE_ACTIVITY:
+                        Tag hensyn til aktiviteter, hvor tøjet kan blive
+                        beskidt af maling, mad, vand, jord eller andre
+                        materialer.
+                        
+                        Prioritér praktisk tøj, der tåler at blive beskidt.
+                        Overvej om ekstra skiftetøj er relevant.
+                        
+                        MOTOR_SKILLS:
+                        Prioritér bevægelsesfrihed og fleksibelt tøj,
+                        der ikke begrænser barnets bevægelser.
+                        
+                        PLAYGROUND:
+                        Tag højde for udendørs leg og vejret.
+                        Vurder behovet for vejrbestandigt overtøj,
+                        der giver plads til bevægelse.
+                        
+                        OUTDOOR_TRIP:
+                        Tag højde for længere tid udendørs, transport
+                        og skiftende vejrforhold.
+                        Overvej om ekstra tøj er relevant.
+                        
+                        REGLER FOR GARDEROBESAMMENLIGNING:
+                        
+                        - Vurder først, hvad barnet reelt har behov for.
+                        - Sammenlign derefter behovet med den registrerede
+                          garderobe.
+                        - recommendedOutfit skal KUN indeholde relevante
+                          beklædningsdele, som barnet har behov for, men
+                          som IKKE allerede er registreret i garderoben.
+                        - Medtag aldrig beklædningsdele, som allerede er
+                          registreret i garderoben.
+                        - Anbefal ikke tøj alene fordi det ikke er registreret.
+                          Der skal være et konkret behov ud fra dagens forhold.
+                        - Hvis garderoben allerede dækker barnets behov,
+                          skal recommendedOutfit være tom.
+                        - Antag ikke, at familien slet ikke ejer en
+                          beklædningsdel, blot fordi den ikke er registreret.
+                          Forklar i stedet, at den ikke fremgår af
+                          institutionens registrerede garderobe.
+                        - Undgå unødvendige eller overdrevne lag.
+                        - Undgå flere beklædningsdele, der dækker samme behov,
+                          medmindre det er nødvendigt.
+                        
+                        EKSTRA SKIFTETØJ:
+                        
+                        - Vurder selv, om dagens aktiviteter gør ekstra
+                          skiftetøj relevant.
+                        - extraClothesToPack skal indeholde relevante
+                          beklædningsdele til ekstra skift.
+                        - Overvej især risikoen for vådt eller beskidt tøj.
+                        - Anbefal ikke automatisk ekstra skiftetøj,
+                          blot fordi barnet har en bestemt aktivitet.
+                        - Undgå unødvendige ekstra sæt.
+                        - Forklar kort, hvorfor ekstra skiftetøj er relevant.
+                        - Anbefal ikke automatisk, at familien skal købe tøj.
+                        
+                        SPROG OG FORMULERING:
+                        
+                        - Svar altid på naturligt, korrekt og letforståeligt dansk.
+                        - Skriv kort og konkret, som en hjælpsom garderobeassistent.
+                        - Brug almindelige danske betegnelser for beklædning.
+                        - Undgå stavefejl og unaturlige formuleringer.
+                        - Skriv "basislag" og aldrig "basisslag".
+                        - Brug ikke formuleringer som "barnet mangler", når tøj blot ikke er registreret.
+                        - Skriv i stedet "ikke registreret i garderoben".
+                        - Opfind ikke detaljer om aktiviteterne eller omgivelserne.
+                        - Antag eksempelvis ikke, at vandleg foregår på en legeplads.
+                        - Vandleg og udendørs leg skal vurderes som separate aktiviteter.
+                        
+                        VURDERING AF REGNTØJ:
+                        
+                        - Tåge og høj luftfugtighed er ikke i sig selv tilstrækkelige grunde til at anbefale regntøj.
+                        - Vurder især nedbør, risiko for våde omgivelser og barnets faktiske udendørs aktiviteter.
+                        - Anbefal kun regnjakke og regnbukser, når forholdene giver et konkret behov for dem.
+                        - Antag ikke, at vandleg foregår udendørs.
+                        
+                        KRAV TIL FORKLARINGEN:
+                        
+                        - explanation skal bestå af 1-3 korte sætninger.
+                        - Forklar kort, hvilke vejrforhold eller aktiviteter der gør anbefalingerne relevante.
+                        - Gentag ikke beklædningsdelene fra recommendedOutfit eller extraClothesToPack.
+                        - Oplist ikke anbefalingerne igen i forklaringen.
+                        - Skriv ikke en ny overskrift eller punktopstilling i explanation.
+                        - Forklar ikke, at familien mangler tøj. Det fremgår allerede af anbefalingslisten, hvad der ikke er registreret.
+                        - Hvis der ikke er noget relevant at anbefale, skal forklaringen stadig være kort og naturlig.
+                        
+                        
+                        BEKLÆDNINGSKATEGORIER OG TILLADTE VÆRDIER:
+                        
+                        HEADWEAR:
+                        CAP, BEANIE, BUCKET_HAT, SUN_HAT,
+                        BALACLAVA, HEADBAND.
+                        
+                        ACCESSORIES:
+                        NECK_WARMER, MITTENS, GLOVES, SUN_PROTECTION.
+                        
+                        BASE_LAYER:
+                        BODY, UNDERWEAR, TIGHTS, SOCKS, WOOL_BASE_LAYER.
+                        
+                        MID_LAYER:
+                        T_SHIRT, LONG_SLEEVE_SHIRT, SWEATER,
+                        FLEECE, THERMAL_SHIRT.
+                        
+                        OUTER_LAYER:
+                        RAIN_JACKET, WINTER_JACKET, LIGHT_JACKET,
+                        THERMAL_JACKET, SOFTSHELL_JACKET,
+                        RAIN_PANTS, THERMAL_PANTS, SNOWSUIT.
+                        
+                        PANTS:
+                        SHORTS, REGULAR_PANTS, LEGGINGS.
+                        
+                        SHOES:
+                        SNEAKERS, RAIN_BOOTS, WINTER_BOOTS,
+                        SANDALS, THERMAL_BOOTS, INDOOR_SHOES.
+                        
+                        OUTPUTREGLER:
+                        
+                        Returnér en struktureret OutfitResponse med:
+                        
+                        - recommendedOutfit:
+                          En Outfit med de relevante beklædningsdele,
+                          som barnet har behov for, men som ikke er
+                          registreret i institutionens garderobe.
+                        
+                        - extraClothesToPack:
+                          En Outfit med de ekstra beklædningsdele,
+                          som det er relevant at medbringe til dagen.
+                        
+                        - explanation:
+                          En kort og letforståelig forklaring på dansk.
+                          Forklar kun, hvorfor dagens vejr og aktiviteter
+                          gør bestemte beklædningsbehov relevante.
+                          Gentag ikke beklædningsdelene fra anbefalingslisterne.
+                        
+                        Brug udelukkende de tilladte enum-værdier
+                        fra kategorierne ovenfor.
+                        
+                        Returnér enum-værdierne præcist som angivet
+                        med store bogstaver og underscores.
+                        
+                        Opfind aldrig nye beklædningsdele,
+                        kategorier eller enum-værdier.
+                        
+                        Alle lister i output skal returneres som
+                        tomme lister, hvis der ikke er noget relevant.
+                        Returnér aldrig null.
+                        
+                        Vær konkret og selektiv.
+                        Det er bedre at anbefale få relevante beklædningsdele
+                        end at give en lang liste med unødvendige forslag.
                         """)
+
                 .user("""
-                        Lav en personlig tøj anbefaling til barnet baseret på følgende situation.
+                        VEJRFORHOLD:
                         
-                        Barnets situation:
-                        - Ophold: %s
-                        - Motorisk udvikling: %s
+                        Vejrbeskrivelse: %s
+                        Temperatur: %.1f grader
+                        Luftfugtighed: %d procent
+                        Vindhastighed: %.1f m/s
+                        Nedbør: %.1f mm
+                        UV-indeks: %.1f
+                        Snefald: %.1f cm
                         
-                        Aktuelle vejrforhold:
-                        - Vejr: %s
-                        - Temperatur: %.1f °C
-                        - Vindhastighed: %.1f m/s
-                        - Nedbør: %.1f mm
+                        BARNETS OPLYSNINGER:
                         
-                        Barnets garderobe:
-                        - Headwear: %s
-                        - Accessories: %s
-                        - BaseLayer: %s
-                        - MidtLayer: %s
-                        - Jacket: %s
-                        - Shirt: %s
-                        - Pants: %s
-                        - Shoes: %s
+                        Motoriske udviklingsniveau: %s
+                        Tid indendørs/udendørs: %s
+                        Dagens aktiviteter: %s
                         
-                        Vurder barnets samlede behov, og sammensæt det outfit, der giver den bedste
-                        balance mellem komfort, bevægelsesfrihed og beskyttelse mod vejrforholdene.
+                        BARNETS REGISTREREDE GARDAROBE I INSTITUTIONEN:
                         
-                        Anbefalingen skal være praktisk og tilpasset barnets aktuelle udvikling og
-                        de aktiviteter, barnet skal deltage i.
+                        %s
+                        
+                        Vurder barnets reelle behov for dagen.
+                        Sammenlign behovet med garderoben, og anbefal kun
+                        relevante beklædningsdele, der ikke allerede er
+                        registreret.
+                        
+                        Vurder også selv, om ekstra skiftetøj er relevant.
+                        
                         """.formatted(
-                        request.dayType(),
-                        request.activity(),
-                        weather.description(),
-                        weather.hourly().temperature().getFirst(),
-                        weather.hourly().windSpeed().getFirst(),
-                        weather.daily().precipitation().getFirst(),
-                        clothes.headwear(),
-                        clothes.accessories(),
-                        clothes.baseLayer(),
-                        clothes.midtLayer(),
-                        clothes.jacket(),
-                        clothes.shirt(),
-                        clothes.pants(),
-                        clothes.shoes()
+                        OpenMeteoResponse.describe(w.daily().weatherCode().getFirst()),
+                        w.hourly().temperature().getFirst(),
+                        w.hourly().humidity().getFirst(),
+                        w.hourly().windSpeed().getFirst(),
+                        w.daily().precipitation().getFirst(),
+                        w.daily().uvIndex().getFirst(),
+                        w.daily().snowfall().getFirst(),
+                        request.mobilityLevel(),
+                        request.outdoorTime(),
+                        request.dailyActivities(),
+                        request.availableClothes()
                 ))
+                .tools(tomatoThrowingMachine)
                 .call()
-                .entity(OutfitResponse.class, ChatClient.EntityParamSpec::useProviderStructuredOutput);
+                .entity(OutfitResponse.class,
+                        ChatClient.EntityParamSpec::useProviderStructuredOutput);
     }
 }

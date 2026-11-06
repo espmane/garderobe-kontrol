@@ -4,6 +4,7 @@ import gruppe3.garderobekontrol.model.Outfit;
 
 public record OutfitResponse(
         Outfit recommendedOutfit,
+        Outfit extraClothesToPack,
         String explanation
 ) {
 }
