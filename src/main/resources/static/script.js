@@ -3,6 +3,7 @@ const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
+const missingButton = document.querySelector("#submitButton-missing");
 
 const socket = new WebSocket("ws://localhost:8080/ws")
 
@@ -67,6 +68,16 @@ async function loadWeather() {
     });
 }
 
+function getDateTimeHour() {
+
+    const date = new Date();
+
+    let hour = date.getHours();
+
+    return (hour < 10 ? "0" : "") + hour
+}
+
+
 function getWeatherIcon(weatherCode) {
     switch (weatherCode) {
         case 0:
@@ -128,6 +139,7 @@ function getWeatherIcon(weatherCode) {
 
 function displayWeather(weather) {
     weatherContainer.replaceChildren();
+    const hourOfDay = getDateTimeHour();
 
     const weatherIcon = document.querySelector(
         ".weather-heading .section-icon"
@@ -147,7 +159,7 @@ function displayWeather(weather) {
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
-    temperature.textContent = `${weather.hourly.temperature[0]}°C`;
+    temperature.textContent = `${weather.hourly.temperature[hourOfDay]}°C`; //rent faktisk ulovligt
 
     const temperatureLabel = document.createElement("p");
     temperatureLabel.className = "temperature-label";
@@ -164,7 +176,7 @@ function displayWeather(weather) {
 
     const wind = document.createElement("p");
     wind.className = "weather-wind";
-    wind.textContent = `Vind: ${weather.hourly.windSpeed[0]} m/s`;
+    wind.textContent = `Vind: ${weather.hourly.windSpeed[hourOfDay]} m/s`; //kriminelt
 
     weatherDetails.append(description, wind);
 
@@ -213,10 +225,10 @@ function getSelectedOutfit() {
     };
 }
 
-async function getOutfitRecommendation(outfitData) {
+async function getOutfitRecommendation(outfitData, endpoint) {
     console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
 
-    const response = await fetch("/api/outfit", {
+    const response = await fetch(endpoint, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -282,9 +294,8 @@ function formatEnum(value) {
 }
 
 
-function displayRecommendation(result) {
+function displayRecommendation(result, showExtraClothes = true) {
     recommendation.replaceChildren();
-
     const categories = {
         headwear: "Hovedbeklædning",
         accessories: "Tilbehør",
@@ -329,16 +340,20 @@ function displayRecommendation(result) {
         return true;
     }
 
-        const hasMissingClothes = displayOutfit(
-            result.recommendedOutfit, "Tøj, der ikke er registreret i gardaroben"
+    const hasMissingClothes = displayOutfit(
+        result.recommendedOutfit,
+        "Tøj, der ikke er registreret i garderoben"
     );
-        if (!hasMissingClothes) {
-            const message = document.createElement("p");
-            message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
-            recommendation.appendChild(message);
 
-        }
+    if (!hasMissingClothes) {
+        const message = document.createElement("p");
+        message.textContent =
+            "Den registrerede garderobe ser ud til at dække barnets behov for denne dag.";
 
+        recommendation.appendChild(message);
+    }
+
+    if (showExtraClothes) {
         const hasExtraClothes = displayOutfit(
             result.extraClothesToPack,
             "Ekstra skiftetøj at medbringe"
@@ -346,55 +361,91 @@ function displayRecommendation(result) {
 
         if (!hasExtraClothes) {
             const message = document.createElement("p");
-            message.textContent = "Der vurderes ikke at være behov for ekstra skiftetøj.";
+            message.textContent =
+                "Der vurderes ikke at være behov for ekstra skiftetøj.";
+
             recommendation.appendChild(message);
         }
-
-        const explanation = document.createElement("p");
-        explanation.textContent = result.explanation ?? "";
-        recommendation.appendChild(explanation);
-
-        resultSection.hidden = false;
     }
 
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+    const explanation = document.createElement("p");
+    explanation.textContent = result.explanation ?? "";
 
-        const outfitData = buildOutfitRequest();
+    recommendation.appendChild(explanation);
 
-        if (userLatitude == null || userLongitude == null) {
-            recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
-            resultSection.hidden = false;
-            return;
-        }
+    resultSection.hidden = false;
+}
 
-        if (!outfitData.mobilityLevel || !outfitData.outdoorTime) {
-            resultSection.hidden = false;
-            recommendation.textContent =
-                "Vælg barnets motoriske niveau og tid indendørs/udendørs.";
-            return;
-        }
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-        submitButton.disabled = true;
-        submitButton.textContent = "Finder passende tøj...";
+    const clickedButton = event.submitter;
+
+    let endpoint;
+    let showExtraClothes;
+
+    if (clickedButton.id === "submitButton") {
+        endpoint = "/api/outfit/recommend";
+        showExtraClothes = false;
+
+    } else if (clickedButton.id === "submitButton-missing") {
+        endpoint = "/api/outfit/missing";
+        showExtraClothes = true;
+
+    } else {
+        return;
+    }
+
+    const outfitData = buildOutfitRequest();
+
+    if (userLatitude == null || userLongitude == null) {
+        recommendation.textContent =
+            "Vi kunne ikke finde din lokation. Prøv igen.";
 
         resultSection.hidden = false;
+        return;
+    }
+
+    if (!outfitData.mobilityLevel || !outfitData.outdoorTime) {
+        resultSection.hidden = false;
         recommendation.textContent =
-            "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
+            "Vælg barnets motoriske niveau og tid indendørs/udendørs.";
+        return;
+    }
 
-        try {
-            const result = await getOutfitRecommendation(outfitData);
-            displayRecommendation(result);
+    submitButton.disabled = true;
+    missingButton.disabled = true;
 
-        } catch (error) {
-            console.error(error);
-            recommendation.textContent =
-                "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
+    clickedButton.textContent = "Finder passende tøj...";
 
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = "Find passende tøj";
-        }
-    });
+    resultSection.hidden = false;
 
-    loadWeather();
+    recommendation.textContent =
+        "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
+
+    try {
+        const result = await getOutfitRecommendation(
+            outfitData,
+            endpoint
+        );
+
+        displayRecommendation(result, showExtraClothes);
+
+    } catch (error) {
+        console.error(error);
+        recommendation.textContent =
+            "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
+
+    } finally {
+        submitButton.disabled = false;
+        missingButton.disabled = false;
+
+        submitButton.innerHTML =
+            "<span>♧</span> Find passende tøj <span>→</span>";
+
+        missingButton.innerHTML =
+            "<span>♧</span> Find manglende tøj <span>→</span>";
+    }
+});
+
+loadWeather();

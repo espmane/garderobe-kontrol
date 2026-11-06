@@ -408,32 +408,43 @@ input[type="checkbox"] {
     cursor: pointer;
 }
 
-.recommend-button {
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: min(620px, 100%);
+    margin: 0 auto;
+}
+
+.recommend-button,
+.missing-outfit-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    width: min(620px, 100%);
-    margin: 0 auto;
-    padding: 19px 25px;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 19px 15px;
     border: 0;
     border-radius: 18px;
     background: linear-gradient(120deg, #3da6ff, #0864c6);
     color: white;
     font-family: inherit;
-    font-size: 23px;
+    font-size: 20px;
     font-weight: 900;
     cursor: pointer;
     box-shadow: 0 8px 22px #0864c640;
     transition: 0.2s ease;
 }
 
-.recommend-button:hover {
+.recommend-button:hover,
+.missing-outfit-button:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 28px #0864c655;
 }
 
-.recommend-button:disabled {
+.recommend-button:disabled,
+.missing-outfit-button:disabled {
     opacity: 0.65;
     cursor: wait;
     transform: none;
