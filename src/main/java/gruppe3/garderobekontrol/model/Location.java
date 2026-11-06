@@ -1,14 +1,13 @@
 package gruppe3.garderobekontrol.model;
 
-import gruppe3.garderobekontrol.model.enums.City;
-
 public class Location {
+
     private final double LONGITUDE;
     private final double LATITUDE;
 
-    public Location(City city) {
-        this.LONGITUDE = city.getLongitude();
-        this.LATITUDE = city.getLatitude();
+    public Location(double longitude, double latitude) {
+        this.LONGITUDE = longitude;
+        this.LATITUDE = latitude;
     }
 
     public double getLongitude() {

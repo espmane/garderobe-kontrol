@@ -1,6 +1,7 @@
 package gruppe3.garderobekontrol.model.enums;
 
-public enum DayType {
+public enum OutdoorTime {
     INDOOR,
+    INDOOR_OUTDOOR,
     OUTDOOR
 }
