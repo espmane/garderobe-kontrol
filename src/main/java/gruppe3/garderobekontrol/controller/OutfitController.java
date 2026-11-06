@@ -1,6 +1,7 @@
 package gruppe3.garderobekontrol.controller;
 
 import gruppe3.garderobekontrol.model.dto.request.OutfitRequest;
+import gruppe3.garderobekontrol.model.dto.response.OutfitRecommendationResponse;
 import gruppe3.garderobekontrol.model.dto.response.OutfitResponse;
 import gruppe3.garderobekontrol.service.OutfitService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,7 @@ public class OutfitController {
     }
 
     @PostMapping("/api/outfit/recommend")
-    public OutfitResponse recommend(@RequestBody OutfitRequest request) {
+    public OutfitRecommendationResponse recommend(@RequestBody OutfitRequest request) {
         return service.recommend(request);
     }
 

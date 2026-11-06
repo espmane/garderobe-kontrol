@@ -3,38 +3,7 @@ const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
-const submitButtonMissing = document.querySelector("#submitButton-missing");
-
-const socket = new WebSocket("ws://localhost:8080/ws")
-
-socket.onmessage = () => throwTomato();
-
-function throwTomato() {
-    const tomato = document.getElementById("tomato-animation");
-    const splat = document.getElementById("tomato-splat");
-
-    tomato.style.display = splat.style.display = "block";
-    splat.style.opacity = 0;
-
-    tomato.animate([
-        {opacity: 0, transform: "translate(0, 0) scale(.025) rotate(0deg)"},
-        {opacity: 1, transform: "translate(-18vw, -12vh) scale(.22) rotate(360deg)", offset: .22},
-        {transform: "translate(-35vw, -30vh) scale(2) rotate(950deg)", offset: .58},
-        {opacity: 1, transform: "translate(-50vw, -50vh) scale(13) rotate(1620deg)"}
-    ], {
-        duration: 1350,
-        easing: "linear",
-        fill: "forwards"
-    }).onfinish = () => {
-        tomato.style.display = "none";
-        splat.style.opacity = 1;
-
-        setTimeout(() => {
-            splat.style.opacity = 0;
-            setTimeout(() => splat.style.display = "none", 400);
-        }, 150);
-    };
-}
+const missingButton = document.querySelector("#submitButton-missing");
 
 let userLatitude;
 let userLongitude;
@@ -133,28 +102,10 @@ function getSelectedOutfit() {
     };
 }
 
-async function getOutfitRecommendation(outfitData) {
+async function getOutfitRecommendation(outfitData, endpoint) {
     console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
 
-    const response = await fetch("/api/outfit/recommend", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(outfitData)
-    });
-
-    if (!response.ok) {
-        throw new Error("Could not get outfit recommendation");
-    }
-
-    return await response.json();
-}
-
-async function getMissingOutfit(outfitData) {
-    console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
-
-    const response = await fetch("/api/outfit/missing", {
+    const response = await fetch(endpoint, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -220,51 +171,8 @@ function formatEnum(value) {
 }
 
 
-function displayOutput(result, isRecommendation) {
+function displayRecommendation(result, showExtraClothes = true) {
     recommendation.replaceChildren();
-
-    if (!isRecommendation) {
-        displayMissingOutfit(result);
-    } else {
-        displayRecommendation(result);
-    }
-}
-
-function displayRecommendation(result) {
-
-}
-
-function displayMissingOutfit(result) {
-    const hasMissingClothes = displayOutfit(result.recommendedOutfit,
-        "Tøj, der ikke er registreret i gardaroben");
-
-    if (!hasMissingClothes) {
-        const message = document.createElement("p");
-        message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
-        recommendation.appendChild(message);
-    }
-
-    const hasExtraClothes = displayOutfit(
-        result.extraClothesToPack,
-        "Ekstra skiftetøj at medbringe"
-    );
-
-    if (!hasExtraClothes) {
-        const message = document.createElement("p");
-        message.textContent = "Der vurderes ikke at være behov for ekstra skiftetøj.";
-        recommendation.appendChild(message);
-    }
-
-    const explanation = document.createElement("p");
-    explanation.textContent = result.explanation ?? "";
-    recommendation.appendChild(explanation);
-
-    resultSection.hidden = false;
-}
-
-function displayOutfit(outfit, title) {
-    const items = [];
-
     const categories = {
         headwear: "Hovedbeklædning",
         accessories: "Tilbehør",
@@ -275,42 +183,105 @@ function displayOutfit(outfit, title) {
         shoes: "Fodtøj"
     };
 
-    for (const key in categories) {
-        const categoryItems = outfit?.[key] ?? [];
+    function displayOutfit(outfit, title) {
+        const items = [];
 
-        if (categoryItems.length > 0) {
-            items.push({
-                category: categories[key],
-                clothes: categoryItems.map(formatEnum).join(", ")
-            });
+        for (const key in categories) {
+            const categoryItems = outfit?.[key] ?? [];
+
+            if (categoryItems.length > 0) {
+                items.push({
+                    category: categories[key],
+                    clothes: categoryItems.map(formatEnum).join(", ")
+                });
+            }
+        }
+
+        if (items.length === 0) {
+            return false;
+        }
+
+        const heading = document.createElement("h3");
+        heading.textContent = title;
+
+        const list = document.createElement("ul");
+
+        items.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${item.category}: ${item.clothes}`;
+            list.appendChild(listItem);
+        });
+
+        recommendation.append(heading, list);
+
+        return true;
+    }
+
+    const hasMissingClothes = displayOutfit(
+        result.recommendedOutfit,
+        "Tøj, der ikke er registreret i garderoben"
+    );
+
+    if (!hasMissingClothes) {
+        const message = document.createElement("p");
+        message.textContent =
+            "Den registrerede garderobe ser ud til at dække barnets behov for denne dag.";
+
+        recommendation.appendChild(message);
+    }
+
+    if (showExtraClothes) {
+        const hasExtraClothes = displayOutfit(
+            result.extraClothesToPack,
+            "Ekstra skiftetøj at medbringe"
+        );
+
+        if (!hasExtraClothes) {
+            const message = document.createElement("p");
+            message.textContent =
+                "Der vurderes ikke at være behov for ekstra skiftetøj.";
+
+            recommendation.appendChild(message);
         }
     }
 
-    if (items.length === 0) {
-        return false;
-    }
+    const explanation = document.createElement("p");
+    explanation.textContent = result.explanation ?? "";
 
-    const heading = document.createElement("h3");
-    heading.textContent = title;
+    recommendation.appendChild(explanation);
 
-    const list = document.createElement("ul");
-
-    items.forEach(item => {
-        const listItem = document.createElement("li");
-        listItem.textContent = `${item.category}: ${item.clothes}`;
-        list.appendChild(listItem);
-    });
-
-    recommendation.append(heading, list);
-
-    return true;
+    resultSection.hidden = false;
 }
 
-async function handleOutfitSubmit(endpoint, loadingMessage, isRecommendation) {
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const clickedButton = event.submitter;
+
+    let endpoint;
+    let buttonText;
+    let showExtraClothes;
+
+    if (clickedButton.id === "submitButton") {
+        endpoint = "/api/outfit/recommend";
+        buttonText = "Find passende tøj";
+        showExtraClothes = false;
+
+    } else if (clickedButton.id === "submitButton-missing") {
+        endpoint = "/api/outfit/missing";
+        buttonText = "Find manglende tøj";
+        showExtraClothes = true;
+
+    } else {
+        return;
+    }
+
     const outfitData = buildOutfitRequest();
 
     if (userLatitude == null || userLongitude == null) {
-        recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
+        recommendation.textContent =
+            "Vi kunne ikke finde din lokation. Prøv igen.";
+
         resultSection.hidden = false;
         return;
     }
@@ -323,26 +294,22 @@ async function handleOutfitSubmit(endpoint, loadingMessage, isRecommendation) {
     }
 
     submitButton.disabled = true;
-    submitButtonMissing.disabled = true;
+    missingButton.disabled = true;
+
+    clickedButton.textContent = "Finder passende tøj...";
+
+    resultSection.hidden = false;
+
+    recommendation.textContent =
+        "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
 
     try {
-        recommendation.textContent = loadingMessage;
-        resultSection.hidden = false;
+        const result = await getOutfitRecommendation(
+            outfitData,
+            endpoint
+        );
 
-        const result = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(outfitData)
-        });
-
-        if (!result.ok) {
-            throw new Error(`Request failed: ${result.status}`);
-        }
-
-        const data = await result.json();
-        displayOutput(data, isRecommendation);
+        displayRecommendation(result, showExtraClothes);
 
     } catch (error) {
         console.error(error);
@@ -351,24 +318,14 @@ async function handleOutfitSubmit(endpoint, loadingMessage, isRecommendation) {
 
     } finally {
         submitButton.disabled = false;
-        submitButtonMissing.disabled = false;
+        missingButton.disabled = false;
+
+        submitButton.innerHTML =
+            "<span>♧</span> Find passende tøj <span>→</span>";
+
+        missingButton.innerHTML =
+            "<span>♧</span> Find manglende tøj <span>→</span>";
     }
-}
-
-submitButton.addEventListener("click", () => {
-    handleOutfitSubmit(
-        "/api/outfit/recommend",
-        "Finder passende tøj...",
-        true
-    );
-});
-
-submitButtonMissing.addEventListener("click", () => {
-    handleOutfitSubmit(
-        "/api/outfit/missing",
-        "Finder manglende beklædningsdele...",
-        false
-    );
 });
 
 loadWeather();
