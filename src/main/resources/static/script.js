@@ -5,6 +5,34 @@ const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
 const missingButton = document.querySelector("#submitButton-missing");
 
+socket.onmessage = () => throwTomato();
+
+function throwTomato() {
+    const tomato = document.getElementById("tomato-animation");
+    const splat = document.getElementById("tomato-splat");
+
+    tomato.style.display = splat.style.display = "block";
+    splat.style.opacity = 0;
+
+    tomato.animate([
+        {opacity: 0, transform: "translate(0, 0) scale(.025) rotate(0deg)"},
+        {opacity: 1, transform: "translate(-18vw, -12vh) scale(.22) rotate(360deg)", offset: .22},
+        {transform: "translate(-35vw, -30vh) scale(2) rotate(950deg)", offset: .58},
+        {opacity: 1, transform: "translate(-50vw, -50vh) scale(13) rotate(1620deg)"}
+    ], {
+        duration: 1350,
+        easing: "linear",
+        fill: "forwards"
+    }).onfinish = () => {
+        tomato.style.display = "none";
+        splat.style.opacity = 1;
+
+        setTimeout(() => {
+            splat.style.opacity = 0;
+            setTimeout(() => splat.style.display = "none", 400);
+        }, 150);
+    };
+}
 let userLatitude;
 let userLongitude;
 
@@ -47,27 +75,110 @@ function getDateTimeHour() {
     return (hour < 10 ? "0" : "") + hour
 }
 
+
+function getWeatherIcon(weatherCode) {
+    switch (weatherCode) {
+        case 0:
+            return "☀️";
+
+        case 1:
+            return "🌤️";
+
+        case 2:
+            return "⛅";
+
+        case 3:
+            return "☁️";
+
+        case 45:
+        case 48:
+            return "🌫️";
+
+        case 51:
+        case 53:
+        case 55:
+            return "🌦️";
+
+        case 56:
+        case 57:
+            return "🌧️";
+
+        case 61:
+        case 63:
+        case 65:
+        case 66:
+        case 67:
+            return "🌧️";
+
+        case 71:
+        case 73:
+        case 75:
+        case 77:
+            return "🌨️";
+
+        case 80:
+        case 81:
+        case 82:
+            return "🌦️";
+
+        case 85:
+        case 86:
+            return "🌨️";
+
+        case 95:
+        case 96:
+        case 99:
+            return "⛈️";
+
+        default:
+            return "🌤️";
+    }
+}
+
 function displayWeather(weather) {
     weatherContainer.replaceChildren();
     const hourOfDay = getDateTimeHour();
 
+    const weatherIcon = document.querySelector(
+        ".weather-heading .section-icon"
+    );
+
+    const weatherCode = weather.daily?.weatherCode?.[0];
+
+    if (weatherIcon) {
+        weatherIcon.textContent = getWeatherIcon(weatherCode);
+    }
+
     const weatherInfo = document.createElement("div");
     weatherInfo.className = "weather-info";
 
-    const details = document.createElement("div");
+    const temperatureContainer = document.createElement("div");
+    temperatureContainer.className = "temperature-container";
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
     temperature.textContent = `${weather.hourly.temperature[hourOfDay]}°C`; //rent faktisk ulovligt
 
+    const temperatureLabel = document.createElement("p");
+    temperatureLabel.className = "temperature-label";
+    temperatureLabel.textContent = "Temperatur";
+
+    temperatureContainer.append(temperature, temperatureLabel);
+
+    const weatherDetails = document.createElement("div");
+    weatherDetails.className = "weather-details";
+
     const description = document.createElement("p");
+    description.className = "weather-description";
     description.textContent = weather.description ?? "Dagens vejr";
 
     const wind = document.createElement("p");
+    wind.className = "weather-wind";
     wind.textContent = `Vind: ${weather.hourly.windSpeed[hourOfDay]} m/s`; //kriminelt
 
-    details.append(temperature, description, wind);
-    weatherInfo.append(details);
+    weatherDetails.append(description, wind);
+
+    weatherInfo.append(temperatureContainer, weatherDetails);
     weatherContainer.append(weatherInfo);
 }
 
