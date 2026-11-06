@@ -47,11 +47,69 @@ public class OutfitService {
                         - Ved indendørs ophold skal udendørs vejrforhold ignoreres.
                         - Prioritér komfort, bevægelsesfrihed og funktionalitet.
                         
-                        Svar:
-                        - Returnér alle otte kategorier i recommendedOutfit.
-                        - Returnér en forklaring i explanation.
-                        - Forklaringen skal bestå af 2-3 korte sætninger på dansk.
-                        - Begrund valgene med udgangspunkt i barnets situation og vejrforhold.
+                        BEKLÆDNINGSKATEGORIER OG TILLADTE VÆRDIER:
+                        
+                        HEADWEAR:
+                        CAP, BEANIE, BUCKET_HAT, SUN_HAT,
+                        BALACLAVA, HEADBAND.
+                        
+                        ACCESSORIES:
+                        NECK_WARMER, MITTENS, GLOVES, SUN_PROTECTION.
+                        
+                        BASE_LAYER:
+                        BODY, UNDERWEAR, TIGHTS, SOCKS, WOOL_BASE_LAYER.
+                        
+                        MID_LAYER:
+                        T_SHIRT, LONG_SLEEVE_SHIRT, SWEATER,
+                        FLEECE, THERMAL_SHIRT.
+                        
+                        OUTER_LAYER:
+                        RAIN_JACKET, WINTER_JACKET, LIGHT_JACKET,
+                        THERMAL_JACKET, SOFTSHELL_JACKET,
+                        RAIN_PANTS, THERMAL_PANTS, SNOWSUIT.
+                        
+                        PANTS:
+                        SHORTS, REGULAR_PANTS, LEGGINGS.
+                        
+                        SHOES:
+                        SNEAKERS, RAIN_BOOTS, WINTER_BOOTS,
+                        SANDALS, THERMAL_BOOTS, INDOOR_SHOES.
+                        
+                        OUTPUTREGLER:
+                        
+                        Returnér en struktureret OutfitResponse med:
+                        
+                        - recommendedOutfit:
+                          En Outfit med de relevante beklædningsdele,
+                          som barnet har behov for, men som ikke er
+                          registreret i institutionens garderobe.
+                        
+                        - extraClothesToPack:
+                          En Outfit med de ekstra beklædningsdele,
+                          som det er relevant at medbringe til dagen.
+                        
+                        - explanation:
+                          En kort og letforståelig forklaring på dansk.
+                          Forklar kun, hvorfor dagens vejr og aktiviteter
+                          gør bestemte beklædningsbehov relevante.
+                          Gentag ikke beklædningsdelene fra anbefalingslisterne.
+                        
+                        Brug udelukkende de tilladte enum-værdier
+                        fra kategorierne ovenfor.
+                        
+                        Returnér enum-værdierne præcist som angivet
+                        med store bogstaver og underscores.
+                        
+                        Opfind aldrig nye beklædningsdele,
+                        kategorier eller enum-værdier.
+                        
+                        Alle lister i output skal returneres som
+                        tomme lister, hvis der ikke er noget relevant.
+                        Returnér aldrig null.
+                        
+                        Vær konkret og selektiv.
+                        Det er bedre at anbefale få relevante beklædningsdele
+                        end at give en lang liste med unødvendige forslag.
                         
                         - KUN hvis vejret er dårligt skal du kaste en tomat.
                         """)

@@ -220,61 +220,28 @@ function formatEnum(value) {
 }
 
 
-function displayRecommendation(result) {
+function displayOutput(result, isRecommendation) {
     recommendation.replaceChildren();
 
-    const categories = {
-        headwear: "Hovedbeklædning",
-        accessories: "Tilbehør",
-        baseLayer: "Inderste lag",
-        midLayer: "Mellemlag",
-        outerLayer: "Overtøj",
-        pants: "Bukser",
-        shoes: "Fodtøj"
-    };
-
-    function displayOutfit(outfit, title) {
-        const items = [];
-
-        for (const key in categories) {
-            const categoryItems = outfit?.[key] ?? [];
-
-            if (categoryItems.length > 0) {
-                items.push({
-                    category: categories[key],
-                    clothes: categoryItems.map(formatEnum).join(", ")
-                });
-            }
-        }
-
-        if (items.length === 0) {
-            return false;
-        }
-
-        const heading = document.createElement("h3");
-        heading.textContent = title;
-
-        const list = document.createElement("ul");
-
-        items.forEach(item => {
-            const listItem = document.createElement("li");
-            listItem.textContent = `${item.category}: ${item.clothes}`;
-            list.appendChild(listItem);
-        });
-
-        recommendation.append(heading, list);
-
-        return true;
+    if (!isRecommendation) {
+        displayMissingOutfit(result);
+    } else {
+        displayRecommendation(result);
     }
+}
 
-    const hasMissingClothes = displayOutfit(
-        result.recommendedOutfit, "Tøj, der ikke er registreret i gardaroben"
-    );
+function displayRecommendation(result) {
+
+}
+
+function displayMissingOutfit(result) {
+    const hasMissingClothes = displayOutfit(result.recommendedOutfit,
+        "Tøj, der ikke er registreret i gardaroben");
+
     if (!hasMissingClothes) {
         const message = document.createElement("p");
         message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
         recommendation.appendChild(message);
-
     }
 
     const hasExtraClothes = displayOutfit(
@@ -295,7 +262,51 @@ function displayRecommendation(result) {
     resultSection.hidden = false;
 }
 
-async function handleOutfitSubmit(endpoint, loadingMessage) {
+function displayOutfit(outfit, title) {
+    const items = [];
+
+    const categories = {
+        headwear: "Hovedbeklædning",
+        accessories: "Tilbehør",
+        baseLayer: "Inderste lag",
+        midLayer: "Mellemlag",
+        outerLayer: "Overtøj",
+        pants: "Bukser",
+        shoes: "Fodtøj"
+    };
+
+    for (const key in categories) {
+        const categoryItems = outfit?.[key] ?? [];
+
+        if (categoryItems.length > 0) {
+            items.push({
+                category: categories[key],
+                clothes: categoryItems.map(formatEnum).join(", ")
+            });
+        }
+    }
+
+    if (items.length === 0) {
+        return false;
+    }
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const list = document.createElement("ul");
+
+    items.forEach(item => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${item.category}: ${item.clothes}`;
+        list.appendChild(listItem);
+    });
+
+    recommendation.append(heading, list);
+
+    return true;
+}
+
+async function handleOutfitSubmit(endpoint, loadingMessage, isRecommendation) {
     const outfitData = buildOutfitRequest();
 
     if (userLatitude == null || userLongitude == null) {
@@ -331,7 +342,7 @@ async function handleOutfitSubmit(endpoint, loadingMessage) {
         }
 
         const data = await result.json();
-        displayRecommendation(data);
+        displayOutput(data, isRecommendation);
 
     } catch (error) {
         console.error(error);
@@ -347,14 +358,16 @@ async function handleOutfitSubmit(endpoint, loadingMessage) {
 submitButton.addEventListener("click", () => {
     handleOutfitSubmit(
         "/api/outfit/recommend",
-        "Finder passende tøj..."
+        "Finder passende tøj...",
+        true
     );
 });
 
 submitButtonMissing.addEventListener("click", () => {
     handleOutfitSubmit(
         "/api/outfit/missing",
-        "Finder manglende beklædningsdele..."
+        "Finder manglende beklædningsdele...",
+        false
     );
 });
 
