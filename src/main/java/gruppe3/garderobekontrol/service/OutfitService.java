@@ -97,7 +97,6 @@ public class OutfitService {
                         clothes.pants(),
                         clothes.shoes()
                 ))
-
                 .tools(tomatoThrowingMachine)
                 .call()
                 .entity(OutfitResponse.class, ChatClient.EntityParamSpec::useProviderStructuredOutput);

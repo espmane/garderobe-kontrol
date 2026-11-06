@@ -3,6 +3,7 @@ const weatherContainer = document.querySelector("#weather");
 const resultSection = document.querySelector("#result");
 const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
+const submitButtonMissing = document.querySelector("#submitButton-missing");
 
 const socket = new WebSocket("ws://localhost:8080/ws")
 
@@ -294,9 +295,7 @@ function displayRecommendation(result) {
     resultSection.hidden = false;
 }
 
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
+async function handleOutfitSubmit(endpoint, loadingMessage) {
     const outfitData = buildOutfitRequest();
 
     if (userLatitude == null || userLongitude == null) {
@@ -313,15 +312,26 @@ form.addEventListener("submit", async (event) => {
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = "Finder passende tøj...";
-
-    resultSection.hidden = false;
-    recommendation.textContent =
-        "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
+    submitButtonMissing.disabled = true;
 
     try {
-        const result = await getOutfitRecommendation(outfitData);
-        displayRecommendation(result);
+        recommendation.textContent = loadingMessage;
+        resultSection.hidden = false;
+
+        const result = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(outfitData)
+        });
+
+        if (!result.ok) {
+            throw new Error(`Request failed: ${result.status}`);
+        }
+
+        const data = await result.json();
+        displayRecommendation(data);
 
     } catch (error) {
         console.error(error);
@@ -330,8 +340,22 @@ form.addEventListener("submit", async (event) => {
 
     } finally {
         submitButton.disabled = false;
-        submitButton.textContent = "Find passende tøj";
+        submitButtonMissing.disabled = false;
     }
+}
+
+submitButton.addEventListener("click", () => {
+    handleOutfitSubmit(
+        "/api/outfit/recommend",
+        "Finder passende tøj..."
+    );
+});
+
+submitButtonMissing.addEventListener("click", () => {
+    handleOutfitSubmit(
+        "/api/outfit/missing",
+        "Finder manglende beklædningsdele..."
+    );
 });
 
 loadWeather();
