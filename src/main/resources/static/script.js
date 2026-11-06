@@ -294,51 +294,52 @@ function formatEnum(value) {
 }
 
 
-function displayRecommendation(result, showExtraClothes = true) {
-    recommendation.replaceChildren();
-    const categories = {
-        headwear: "Hovedbeklædning",
-        accessories: "Tilbehør",
-        baseLayer: "Inderste lag",
-        midLayer: "Mellemlag",
-        outerLayer: "Overtøj",
-        pants: "Bukser",
-        shoes: "Fodtøj"
-    };
+const categories = {
+    headwear: "Hovedbeklædning",
+    accessories: "Tilbehør",
+    baseLayer: "Inderste lag",
+    midLayer: "Mellemlag",
+    outerLayer: "Overtøj",
+    pants: "Bukser",
+    shoes: "Fodtøj"
+};
 
-    function displayOutfit(outfit, title) {
-        const items = [];
+function displayOutfit(outfit, title) {
+    const items = [];
 
-        for (const key in categories) {
-            const categoryItems = outfit?.[key] ?? [];
+    for (const key in categories) {
+        const categoryItems = outfit?.[key] ?? [];
 
-            if (categoryItems.length > 0) {
-                items.push({
-                    category: categories[key],
-                    clothes: categoryItems.map(formatEnum).join(", ")
-                });
-            }
+        if (categoryItems.length > 0) {
+            items.push({
+                category: categories[key],
+                clothes: categoryItems.map(formatEnum).join(", ")
+            });
         }
-
-        if (items.length === 0) {
-            return false;
-        }
-
-        const heading = document.createElement("h3");
-        heading.textContent = title;
-
-        const list = document.createElement("ul");
-
-        items.forEach(item => {
-            const listItem = document.createElement("li");
-            listItem.textContent = `${item.category}: ${item.clothes}`;
-            list.appendChild(listItem);
-        });
-
-        recommendation.append(heading, list);
-
-        return true;
     }
+
+    if (items.length === 0) {
+        return false;
+    }
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const list = document.createElement("ul");
+
+    items.forEach(item => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${item.category}: ${item.clothes}`;
+        list.appendChild(listItem);
+    });
+
+    recommendation.append(heading, list);
+
+    return true;
+}
+
+function displayMissingClothes(result) {
+    recommendation.replaceChildren();
 
     const hasMissingClothes = displayOutfit(
         result.recommendedOutfit,
@@ -353,20 +354,34 @@ function displayRecommendation(result, showExtraClothes = true) {
         recommendation.appendChild(message);
     }
 
-    if (showExtraClothes) {
-        const hasExtraClothes = displayOutfit(
-            result.extraClothesToPack,
-            "Ekstra skiftetøj at medbringe"
-        );
+    const hasExtraClothes = displayOutfit(
+        result.extraClothesToPack,
+        "Ekstra skiftetøj at medbringe"
+    );
 
-        if (!hasExtraClothes) {
-            const message = document.createElement("p");
-            message.textContent =
-                "Der vurderes ikke at være behov for ekstra skiftetøj.";
+    if (!hasExtraClothes) {
+        const message = document.createElement("p");
+        message.textContent =
+            "Der vurderes ikke at være behov for ekstra skiftetøj.";
 
-            recommendation.appendChild(message);
-        }
+        recommendation.appendChild(message);
     }
+
+    const explanation = document.createElement("p");
+    explanation.textContent = result.explanation ?? "";
+
+    recommendation.appendChild(explanation);
+
+    resultSection.hidden = false;
+}
+
+function displayChosenOutfit(result, selectedOutfit) {
+    recommendation.replaceChildren();
+
+    displayOutfit(
+        selectedOutfit,
+        "Dit valgte outfit"
+    );
 
     const explanation = document.createElement("p");
     explanation.textContent = result.explanation ?? "";
@@ -382,15 +397,12 @@ form.addEventListener("submit", async (event) => {
     const clickedButton = event.submitter;
 
     let endpoint;
-    let showExtraClothes;
 
     if (clickedButton.id === "submitButton") {
         endpoint = "/api/outfit/recommend";
-        showExtraClothes = false;
 
     } else if (clickedButton.id === "submitButton-missing") {
         endpoint = "/api/outfit/missing";
-        showExtraClothes = true;
 
     } else {
         return;
@@ -429,7 +441,14 @@ form.addEventListener("submit", async (event) => {
             endpoint
         );
 
-        displayRecommendation(result, showExtraClothes);
+        if (clickedButton.id === "submitButton") {
+            displayChosenOutfit(
+                result,
+                outfitData.availableClothes
+            );
+        } else {
+            displayMissingClothes(result);
+        }
 
     } catch (error) {
         console.error(error);
