@@ -218,11 +218,11 @@ function displayRecommendation(result) {
     }
 
         const hasMissingClothes = displayOutfit(
-            result.recommendedOutfit, "Tøj, der mangler i gardaroben"
+            result.recommendedOutfit, "Tøj, der ikke er registreret i gardaroben"
     );
         if (!hasMissingClothes) {
             const message = document.createElement("p");
-            message.textContent = "Gardaroben ser ud til at dække barnets behov for denne dag.";
+            message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
             recommendation.appendChild(message);
 
         }
