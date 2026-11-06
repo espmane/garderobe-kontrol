@@ -5,6 +5,8 @@ const recommendation = document.querySelector("#recommendation");
 const submitButton = document.querySelector("#submitButton");
 const missingButton = document.querySelector("#submitButton-missing");
 
+const socket = new WebSocket("ws://localhost:8080/ws")
+
 socket.onmessage = () => throwTomato();
 
 function throwTomato() {
