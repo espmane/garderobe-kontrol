@@ -142,20 +142,33 @@ function displayWeather(weather) {
     const weatherInfo = document.createElement("div");
     weatherInfo.className = "weather-info";
 
-    const details = document.createElement("div");
+    const temperatureContainer = document.createElement("div");
+    temperatureContainer.className = "temperature-container";
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
     temperature.textContent = `${weather.hourly.temperature[0]}°C`;
 
+    const temperatureLabel = document.createElement("p");
+    temperatureLabel.className = "temperature-label";
+    temperatureLabel.textContent = "Temperatur";
+
+    temperatureContainer.append(temperature, temperatureLabel);
+
+    const weatherDetails = document.createElement("div");
+    weatherDetails.className = "weather-details";
+
     const description = document.createElement("p");
+    description.className = "weather-description";
     description.textContent = weather.description ?? "Dagens vejr";
 
     const wind = document.createElement("p");
+    wind.className = "weather-wind";
     wind.textContent = `Vind: ${weather.hourly.windSpeed[0]} m/s`;
 
-    details.append(temperature, description, wind);
-    weatherInfo.append(details);
+    weatherDetails.append(description, wind);
+
+    weatherInfo.append(temperatureContainer, weatherDetails);
     weatherContainer.append(weatherInfo);
 }
 
