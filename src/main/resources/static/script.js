@@ -34,6 +34,7 @@ function throwTomato() {
         }, 150);
     };
 }
+
 let userLatitude;
 let userLongitude;
 
@@ -134,7 +135,25 @@ function getSelectedOutfit() {
 async function getOutfitRecommendation(outfitData) {
     console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
 
-    const response = await fetch("/api/outfit", {
+    const response = await fetch("/api/outfit/recommend", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(outfitData)
+    });
+
+    if (!response.ok) {
+        throw new Error("Could not get outfit recommendation");
+    }
+
+    return await response.json();
+}
+
+async function getMissingOutfit(outfitData) {
+    console.log("JSON til backend:", JSON.stringify(outfitData, null, 2));
+
+    const response = await fetch("/api/outfit/missing", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -247,72 +266,72 @@ function displayRecommendation(result) {
         return true;
     }
 
-        const hasMissingClothes = displayOutfit(
-            result.recommendedOutfit, "Tøj, der ikke er registreret i gardaroben"
+    const hasMissingClothes = displayOutfit(
+        result.recommendedOutfit, "Tøj, der ikke er registreret i gardaroben"
     );
-        if (!hasMissingClothes) {
-            const message = document.createElement("p");
-            message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
-            recommendation.appendChild(message);
+    if (!hasMissingClothes) {
+        const message = document.createElement("p");
+        message.textContent = "Den registrerede gardarobe ser ud til at dække barnets behov for denne dag.";
+        recommendation.appendChild(message);
 
-        }
-
-        const hasExtraClothes = displayOutfit(
-            result.extraClothesToPack,
-            "Ekstra skiftetøj at medbringe"
-        );
-
-        if (!hasExtraClothes) {
-            const message = document.createElement("p");
-            message.textContent = "Der vurderes ikke at være behov for ekstra skiftetøj.";
-            recommendation.appendChild(message);
-        }
-
-        const explanation = document.createElement("p");
-        explanation.textContent = result.explanation ?? "";
-        recommendation.appendChild(explanation);
-
-        resultSection.hidden = false;
     }
 
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+    const hasExtraClothes = displayOutfit(
+        result.extraClothesToPack,
+        "Ekstra skiftetøj at medbringe"
+    );
 
-        const outfitData = buildOutfitRequest();
+    if (!hasExtraClothes) {
+        const message = document.createElement("p");
+        message.textContent = "Der vurderes ikke at være behov for ekstra skiftetøj.";
+        recommendation.appendChild(message);
+    }
 
-        if (userLatitude == null || userLongitude == null) {
-            recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
-            resultSection.hidden = false;
-            return;
-        }
+    const explanation = document.createElement("p");
+    explanation.textContent = result.explanation ?? "";
+    recommendation.appendChild(explanation);
 
-        if (!outfitData.mobilityLevel || !outfitData.outdoorTime) {
-            resultSection.hidden = false;
-            recommendation.textContent =
-                "Vælg barnets motoriske niveau og tid indendørs/udendørs.";
-            return;
-        }
+    resultSection.hidden = false;
+}
 
-        submitButton.disabled = true;
-        submitButton.textContent = "Finder passende tøj...";
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
+    const outfitData = buildOutfitRequest();
+
+    if (userLatitude == null || userLongitude == null) {
+        recommendation.textContent = "Vi kunne ikke finde din lokation. Prøv igen.";
+        resultSection.hidden = false;
+        return;
+    }
+
+    if (!outfitData.mobilityLevel || !outfitData.outdoorTime) {
         resultSection.hidden = false;
         recommendation.textContent =
-            "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
+            "Vælg barnets motoriske niveau og tid indendørs/udendørs.";
+        return;
+    }
 
-        try {
-            const result = await getOutfitRecommendation(outfitData);
-            displayRecommendation(result);
+    submitButton.disabled = true;
+    submitButton.textContent = "Finder passende tøj...";
 
-        } catch (error) {
-            console.error(error);
-            recommendation.textContent =
-                "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
+    resultSection.hidden = false;
+    recommendation.textContent =
+        "Vi finder de beklædningsdele, der er relevante for dit barns dag...";
 
-        } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = "Find passende tøj";
-        }
-    });
+    try {
+        const result = await getOutfitRecommendation(outfitData);
+        displayRecommendation(result);
 
-    loadWeather();
+    } catch (error) {
+        console.error(error);
+        recommendation.textContent =
+            "Der opstod en fejl. Kunne ikke hente tøjanbefalingen.";
+
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Find passende tøj";
+    }
+});
+
+loadWeather();

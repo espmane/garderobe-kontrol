@@ -15,8 +15,13 @@ public class OutfitController {
         this.service = service;
     }
 
-    @PostMapping("/api/outfit")
+    @PostMapping("/api/outfit/recommend")
     public OutfitResponse recommend(@RequestBody OutfitRequest request) {
         return service.recommend(request);
+    }
+
+    @PostMapping("/api/outfit/missing")
+    public OutfitResponse missingOutfit(@RequestBody OutfitRequest request) {
+        return service.missingOutfit(request);
     }
 }
