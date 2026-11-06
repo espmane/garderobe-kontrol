@@ -38,8 +38,18 @@ async function loadWeather() {
     });
 }
 
+function getDateTimeHour() {
+
+    const date = new Date();
+
+    let hour = date.getHours();
+
+    return (hour < 10 ? "0" : "") + hour
+}
+
 function displayWeather(weather) {
     weatherContainer.replaceChildren();
+    const hourOfDay = getDateTimeHour();
 
     const weatherInfo = document.createElement("div");
     weatherInfo.className = "weather-info";
@@ -48,13 +58,13 @@ function displayWeather(weather) {
 
     const temperature = document.createElement("p");
     temperature.className = "temperature";
-    temperature.textContent = `${weather.hourly.temperature[0]}°C`;
+    temperature.textContent = `${weather.hourly.temperature[hourOfDay]}°C`; //rent faktisk ulovligt
 
     const description = document.createElement("p");
     description.textContent = weather.description ?? "Dagens vejr";
 
     const wind = document.createElement("p");
-    wind.textContent = `Vind: ${weather.hourly.windSpeed[0]} m/s`;
+    wind.textContent = `Vind: ${weather.hourly.windSpeed[hourOfDay]} m/s`; //kriminelt
 
     details.append(temperature, description, wind);
     weatherInfo.append(details);
@@ -259,17 +269,14 @@ form.addEventListener("submit", async (event) => {
     const clickedButton = event.submitter;
 
     let endpoint;
-    let buttonText;
     let showExtraClothes;
 
     if (clickedButton.id === "submitButton") {
         endpoint = "/api/outfit/recommend";
-        buttonText = "Find passende tøj";
         showExtraClothes = false;
 
     } else if (clickedButton.id === "submitButton-missing") {
         endpoint = "/api/outfit/missing";
-        buttonText = "Find manglende tøj";
         showExtraClothes = true;
 
     } else {
