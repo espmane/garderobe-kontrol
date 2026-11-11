@@ -72,9 +72,7 @@ function getDateTimeHour() {
 
     const date = new Date();
 
-    let hour = date.getHours();
-
-    return (hour < 10 ? "0" : "") + hour
+    return date.getHours();
 }
 
 
